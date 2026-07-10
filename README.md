@@ -1,110 +1,95 @@
-# StartupPulse AI 🚀
+# 🚀 StartupPulse AI
 
-![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
-![Streamlit](https://img.shields.io/badge/Streamlit-1.33.0-FF4B4B.svg)
-![PyTorch](https://img.shields.io/badge/PyTorch-2.2.1-EE4C2C.svg)
-![Transformers](https://img.shields.io/badge/Transformers-v5-FFD21E.svg)
-![SHAP](https://img.shields.io/badge/SHAP-Explainable_AI-black.svg)
-![License](https://img.shields.io/badge/License-MIT-green.svg)
+### Explainable AI-Powered Employee Sentiment Analysis using DeBERTa-v3 and SHAP
 
-**Explainable Employee Sentiment Analysis using DeBERTa-v3 and SHAP.**
+<p align="center">
 
-StartupPulse AI is a production-ready, research-grade platform designed to bring transparency and deep learning precision to Human Resources and organizational psychology metrics. It transitions the classic "black-box" NLP sentiment classifier into a trusted, fully interpretable analytical tool.
+![Python](https://img.shields.io/badge/Python-3.10-blue?style=for-the-badge&logo=python)
 
----
+![PyTorch](https://img.shields.io/badge/PyTorch-Deep%20Learning-red?style=for-the-badge&logo=pytorch)
 
-## 🎯 Features
+![Transformers](https://img.shields.io/badge/HuggingFace-Transformers-yellow?style=for-the-badge)
 
-- **State-of-the-Art NLP**: Utilizes Microsoft's `DeBERTa-v3-base` fine-tuned for high-accuracy 3-class sentiment tracking.
-- **Explainable AI (XAI)**: Natively integrates SHAP (SHapley Additive exPlanations) to dynamically map specific textual tokens to their neural prediction impact.
-- **Dynamic Analytics**: Automated macro-level statistics parsing evaluation matrices, classification reports, and dataset distributions.
-- **Professional Dashboard**: A beautifully designed, highly responsive Streamlit web application.
-- **Production Ready**: Robust exception handling, unified logging, and `pathlib` OS-agnostic structural integrity.
+![Streamlit](https://img.shields.io/badge/Streamlit-Dashboard-FF4B4B?style=for-the-badge&logo=streamlit)
+
+![SHAP](https://img.shields.io/badge/Explainable%20AI-SHAP-success?style=for-the-badge)
+
+![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+
+</p>
 
 ---
 
-## 🏗️ Architecture
+## 📖 Overview
 
-```mermaid
-graph TD;
-    A[Raw Employee Reviews] --> B[Data Pipeline & Stratification];
-    B --> C[DeBERTa-v3 Training Engine];
-    C --> D[Evaluation & Reports];
-    C --> E[Inference Predictor];
-    E --> F[SHAP Explainability Module];
-    F --> G[Streamlit Dashboard Interface];
-```
+StartupPulse AI is an Explainable Artificial Intelligence (XAI) platform designed to analyze employee reviews using a fine-tuned DeBERTa-v3 Transformer model.
+
+Unlike traditional sentiment analysis systems, StartupPulse AI not only predicts whether employee feedback is Positive, Neutral, or Negative, but also explains **why** the prediction was made using SHAP (SHapley Additive Explanations).
+
+The project combines Natural Language Processing (NLP), Deep Learning, Explainable AI, and Interactive Data Visualization into a single platform that helps organizations understand employee sentiment in a transparent and trustworthy manner.
 
 ---
 
-## 📂 Folder Structure
+# ✨ Key Features
 
-```text
-StartupPulse-AI/
-├── dashboard/       # Professional Streamlit web application
-├── data/            # Stratified employee review datasets
-├── models/          # Trained DeBERTa-v3 weights & tokenizers
-├── reports/         # Confusion matrices, classification logs, and SHAP visual outputs
-├── src/             
-│   ├── config/      # OS-agnostic pathlib configurations
-│   ├── explainability/ # SHAP tensor extraction and plotting mechanics
-│   ├── inference/   # REST/API ready inference endpoints
-│   ├── model/       # Transformers v5 Training, Evaluation, and Prediction logic
-│   ├── pipeline/    # PyTorch dataset handlers
-│   └── utils/       # Centralized metrics, seeders, and application loggers
-├── test_backend.py  # CI/CD ready structural backend validation suite
-├── requirements.txt # Pinned project dependencies
-└── README.md        # Project documentation
-```
+- 🤖 Fine-tuned **DeBERTa-v3** Transformer model for employee sentiment classification.
+- 🧠 Explainable AI using **SHAP** to visualize token-level importance.
+- 📊 Interactive **Streamlit Dashboard** for real-time sentiment analysis.
+- 💬 Predicts **Positive**, **Neutral**, and **Negative** employee sentiment.
+- 📈 Model evaluation with Accuracy, Precision, Recall, F1-Score, and Confusion Matrix.
+- 🔍 Real-time prediction confidence scores.
+- 📁 Modular and production-ready project structure.
+- 🎯 Designed specifically for startup employee feedback analysis.
 
 ---
 
-## 🚀 Installation & Usage
+# 🏗️ System Architecture
 
-### 1. Installation
-Clone the repository and install the precisely pinned dependencies:
-```bash
-git clone https://github.com/yourusername/StartupPulse-AI.git
-cd StartupPulse-AI
-python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-```
+The overall workflow of StartupPulse AI is illustrated below.
 
-### 2. Launching the Dashboard
-Launch the frontend UI to interact with the model:
-```bash
-streamlit run dashboard/app.py
-```
+<p align="center">
+    <img src="assets/architecture.png" width="900">
+</p>
 
-### 3. Model Training
-To retrain the model on new data:
-```bash
-python -m src.model.train
-```
+### Workflow
 
-### 4. Model Evaluation
-To evaluate precision, recall, f1, and generate a confusion matrix:
-```bash
-python -m src.model.evaluate
-```
+1. Employee reviews are collected.
+2. Text preprocessing cleans the input.
+3. Reviews are tokenized using the DeBERTa-v3 tokenizer.
+4. The fine-tuned Transformer predicts sentiment.
+5. SHAP explains the prediction.
+6. Results are displayed in the Streamlit dashboard.
 
 ---
 
-## 📊 SHAP Explainability
+# 📸 Dashboard Preview
 
-StartupPulse AI uses the `shap.Explainer` library targeted at HuggingFace tokenizers to trace neural activation directly back to character tokens. The dashboard generates:
-1. **Waterfall Plots**: Tracking exactly how base values shift toward the final probability.
-2. **Token Importance Matrices**: Highlighting semantic drivers of positive/negative sentiment.
+## Home Dashboard
 
----
-
-## 📈 Future Work
-- **Containerization**: Wrapping the inference endpoint and dashboard in Docker containers for AWS/GCP deployments.
-- **Active Learning**: Integrating feedback mechanisms in the dashboard to flag misclassifications for continuous re-training.
-- **Topic Modeling**: Clustering distinct corporate complaints (e.g., "compensation" vs "management").
+<p align="center">
+<img src="assets/dashboard_home.png" width="900">
+</p>
 
 ---
 
-## ⚖️ License
-This project is licensed under the MIT License - see the LICENSE file for details.
+## Prediction Result
+
+<p align="center">
+<img src="assets/prediction_result.png" width="900">
+</p>
+
+---
+
+## SHAP Explainability
+
+<p align="center">
+<img src="assets/shap_explanation.png" width="900">
+</p>
+
+---
+
+## Confusion Matrix
+
+<p align="center">
+<img src="assets/confusion_matrix.png" width="700">
+</p>
