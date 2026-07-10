@@ -1,0 +1,20 @@
+# Core ML & Data
+pandas==2.2.1
+numpy==1.26.4
+scikit-learn==1.4.1.post1
+torch==2.2.1
+
+# Transformers & NLP
+transformers==4.40.1
+sentencepiece==0.2.0
+
+# Explainability
+shap==0.45.0
+
+# Frontend & Visualization
+streamlit==1.33.0
+matplotlib==3.8.3
+seaborn==0.13.2
+
+# Utilities
+tqdm==4.66.2
