@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import sys
-import time
 from PIL import Image
 from pathlib import Path
 import streamlit.components.v1 as components
@@ -10,8 +9,11 @@ import html
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.append(str(PROJECT_ROOT))
 
-from src.explainability.shap_explainer import explain_prediction, SHAPExplainer, SHAP_DIR
-from src.config.config import REPORTS_DIR, TRAIN_DATA_PATH, VALIDATION_DATA_PATH, TEST_DATA_PATH, SENTIMENT_MAPPING
+from src.config.config import (
+    REPORTS_DIR, TRAIN_DATA_PATH, VALIDATION_DATA_PATH,
+    TEST_DATA_PATH, SENTIMENT_MAPPING, MODEL_SAVE_DIR,
+    MODEL_NAME, MAX_LENGTH, NUM_LABELS,
+)
 from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -19,9 +21,38 @@ logger = get_logger(__name__)
 APP_VERSION = "v1.3.0"
 
 
+# ---------------------------------------------------------------------------
+# LAZY ML IMPORTS — loaded only when needed (Analyze Review / Explainability)
+# ---------------------------------------------------------------------------
+_ml_loaded = False
+_torch = None
+_shap = None
+_AutoModelForSequenceClassification = None
+_AutoTokenizer = None
+
+
+def _load_ml_libs():
+    """Lazily import heavy ML libraries only when a prediction is requested."""
+    global _ml_loaded, _torch, _shap, _AutoModelForSequenceClassification, _AutoTokenizer
+    if _ml_loaded:
+        return
+    import torch as _t
+    import shap as _s
+    from transformers import (
+        AutoModelForSequenceClassification as _M,
+        AutoTokenizer as _T,
+    )
+    _torch = _t
+    _shap = _s
+    _AutoModelForSequenceClassification = _M
+    _AutoTokenizer = _T
+    _ml_loaded = True
+
+
 def sanitize_html(text: str) -> str:
     """Sanitize text for safe HTML injection."""
     return html.escape(str(text))
+
 
 st.set_page_config(
     page_title="StartupPulse AI",
@@ -77,15 +108,44 @@ section.main > div { padding: 2rem 2.5rem 4rem 2.5rem; }
 /* ---------- HIDE DEFAULT STREAMLIT ELEMENTS ---------- */
 #MainMenu, footer, header { visibility: hidden; }
 [data-testid="stDecoration"] { display: none; }
-div[data-testid="stVerticalBlockBorderWrapper"]:has(> div > div > div > div.stAlert) { display: none; }
+
+/* ---------- STREAMLIT DARK THEME OVERRIDES ---------- */
+[data-testid="stSelectbox"] div div div,
+[data-testid="stMultiSelect"] div div div {
+    background: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+}
+[data-testid="stSelectbox"] [data-baseweb="select"] {
+    background: var(--bg-secondary) !important;
+    border-color: var(--border) !important;
+}
+[data-baseweb="menu"] {
+    background: var(--bg-secondary) !important;
+}
+[data-baseweb="option"] {
+    background: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+}
+[data-baseweb="option"]:hover, [data-baseweb="option"]:focus,
+[data-baseweb="option"][aria-selected="true"] {
+    background: var(--bg-card-hover) !important;
+    color: var(--accent-light) !important;
+}
+.stRadio label, .stRadio div[role="radiogroup"] label {
+    color: var(--text-primary) !important;
+}
+.stCheckbox label, .stCheckbox span {
+    color: var(--text-primary) !important;
+}
+[data-testid="stVerticalBlock"] p {
+    color: var(--text-secondary) !important;
+}
 
 /* ---------- SIDEBAR ---------- */
 [data-testid="stSidebar"] {
     background: linear-gradient(180deg, #0f0f12 0%, #131316 100%) !important;
     border-right: 1px solid var(--border-subtle) !important;
     padding: 1.5rem 1rem;
-    display: flex;
-    flex-direction: column;
 }
 [data-testid="stSidebar"] [data-testid="stImageContainer"] {
     display: flex;
@@ -150,12 +210,9 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has(> div > div > div > div.stAl
     opacity: 0.6;
 }
 .sidebar-footer {
-    position: absolute;
-    bottom: 1.5rem;
-    left: 1rem;
-    right: 1rem;
     padding-top: 1rem;
     border-top: 1px solid var(--border-subtle);
+    margin-top: auto;
 }
 .sidebar-footer p {
     font-size: 0.72rem !important;
@@ -737,6 +794,28 @@ a[href] { color: var(--accent-light) !important; }
     border-radius: 10px;
     transition: width 0.5s ease;
 }
+
+/* ---------- SECTION LABEL ---------- */
+.section-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 768px) {
+    section.main > div { padding: 1rem 1rem 3rem 1rem; }
+    .hero-card { padding: 2rem 1.5rem; }
+    .hero-card h1 { font-size: 1.8rem !important; }
+    .hero-card .subtitle { font-size: 1rem; }
+    .glass-card { padding: 1.2rem; }
+    .metric-value { font-size: 1.6rem; }
+    .page-heading h1 { font-size: 1.5rem !important; }
+    .result-grid { grid-template-columns: 1fr !important; }
+}
 </style>
 """,
     unsafe_allow_html=True,
@@ -840,6 +919,59 @@ def render_footer():
         <div class="app-footer-copy">&copy; 2026 StartupPulse AI. MIT License.</div>
     </div>
     """
+
+
+def render_loading_html(completed_count: int, active_idx: int, progress_pct: int) -> str:
+    """Render loading stages HTML (defined at module level, not per-click)."""
+    loading_stages = [
+        "Loading DeBERTa-v3 model...",
+        "Tokenizing review...",
+        "Running inference...",
+        "Generating SHAP explanations...",
+        "Rendering dashboard...",
+    ]
+    stages_html = ""
+    for idx, stage_text in enumerate(loading_stages):
+        if idx < completed_count:
+            state = "done"
+        elif idx == active_idx:
+            state = "active"
+        else:
+            state = ""
+        stages_html += f"""
+        <div class="loading-stage {state}"><div class="loading-dot"></div><span>{stage_text}</span></div>
+        """
+    return f"""
+    <div class="glass-card" style="margin-top: 1rem;">
+        <p style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;
+                  color: var(--text-muted); margin-bottom: 0.8rem; font-weight: 600;">
+            Processing Pipeline
+        </p>
+        {stages_html}
+        <div class="progress-track"><div class="progress-fill" style="width: {progress_pct}%;"></div></div>
+    </div>
+    """
+
+
+def load_image_safe(path: Path):
+    """Load an image with error handling, returns None on failure."""
+    try:
+        if path.exists():
+            return Image.open(str(path))
+    except Exception as e:
+        logger.warning(f"Failed to load image {path}: {e}")
+    return None
+
+
+# ---------------------------------------------------------------------------
+# CACHED SHAP EXPLAINER (loaded once, reused across reruns)
+# ---------------------------------------------------------------------------
+@st.cache_resource(show_spinner=False)
+def get_shap_explainer():
+    """Return a cached SHAPExplainer singleton."""
+    _load_ml_libs()
+    from src.explainability.shap_explainer import SHAPExplainer
+    return SHAPExplainer()
 
 
 # ---------------------------------------------------------------------------
@@ -1059,15 +1191,7 @@ try:
         st.markdown('<hr class="premium-divider">', unsafe_allow_html=True)
 
         # Project highlights
-        st.markdown(
-            """
-        <p style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;
-                  color: var(--text-muted); margin-bottom: 1rem; font-weight: 600;">
-            Project Highlights
-        </p>
-        """,
-            unsafe_allow_html=True,
-        )
+        st.markdown('<p class="section-label">Project Highlights</p>', unsafe_allow_html=True)
 
         h1, h2 = st.columns(2)
         with h1:
@@ -1108,15 +1232,7 @@ try:
         st.markdown('<hr class="premium-divider">', unsafe_allow_html=True)
 
         # Live Model Performance
-        st.markdown(
-            """
-        <p style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;
-                  color: var(--text-muted); margin-bottom: 1rem; font-weight: 600;">
-            Model Performance
-        </p>
-        """,
-            unsafe_allow_html=True,
-        )
+        st.markdown('<p class="section-label">Model Performance</p>', unsafe_allow_html=True)
 
         metrics_df = load_metrics()
         if metrics_df is not None:
@@ -1148,19 +1264,11 @@ try:
 
         # SHAP preview on home
         shap_preview_path = PROJECT_ROOT / "assets" / "shap_explanation.png"
-        if shap_preview_path.exists():
-            st.markdown(
-                """
-            <p style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;
-                      color: var(--text-muted); margin-bottom: 1rem; font-weight: 600;">
-                Explainable AI
-            </p>
-            """,
-                unsafe_allow_html=True,
-            )
+        shap_img = load_image_safe(shap_preview_path)
+        if shap_img is not None:
+            st.markdown('<p class="section-label">Explainable AI</p>', unsafe_allow_html=True)
             sh1, sh2 = st.columns([3, 2])
             with sh1:
-                shap_img = Image.open(str(shap_preview_path))
                 st.image(shap_img, use_container_width=True)
             with sh2:
                 st.markdown(
@@ -1212,15 +1320,7 @@ try:
         )
 
         # Example reviews
-        st.markdown(
-            """
-        <p style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;
-                  color: var(--text-muted); margin-bottom: 0.8rem; font-weight: 600;">
-            Try Example Reviews
-        </p>
-        """,
-            unsafe_allow_html=True,
-        )
+        st.markdown('<p class="section-label">Try Example Reviews</p>', unsafe_allow_html=True)
 
         ex_cols = st.columns(3)
         for i, (sentiment, data) in enumerate(EXAMPLE_REVIEWS.items()):
@@ -1253,66 +1353,24 @@ try:
                 st.session_state["prediction_result"] = None
                 st.rerun()
 
-        # Multi-stage loading
+        # Analysis pipeline
         if analyze_clicked:
             if not review_input.strip():
                 st.warning("Please enter a review to analyze.")
             else:
                 st.session_state["review_text"] = review_input
 
-                loading_stages = [
-                    "Loading DeBERTa-v3 model...",
-                    "Tokenizing review...",
-                    "Running inference...",
-                    "Generating SHAP explanations...",
-                    "Rendering dashboard...",
-                ]
-
-                def render_loading_html(completed_count: int, active_idx: int, progress_pct: int) -> str:
-                    """Render loading stages HTML."""
-                    stages_html = ""
-                    for idx, stage_text in enumerate(loading_stages):
-                        if idx < completed_count:
-                            state = "done"
-                        elif idx == active_idx:
-                            state = "active"
-                        else:
-                            state = ""
-                        stages_html += f"""
-                        <div class="loading-stage {state}"><div class="loading-dot"></div><span>{stage_text}</span></div>
-                        """
-                    return f"""
-                    <div class="glass-card" style="margin-top: 1rem;">
-                        <p style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;
-                                  color: var(--text-muted); margin-bottom: 0.8rem; font-weight: 600;">
-                            Processing Pipeline
-                        </p>
-                        {stages_html}
-                        <div class="progress-track"><div class="progress-fill" style="width: {progress_pct}%;"></div></div>
-                    </div>
-                    """
-
                 loading_container = st.empty()
                 loading_container.markdown(render_loading_html(0, 0, 0), unsafe_allow_html=True)
 
                 try:
-                    # Stage 1
-                    time.sleep(0.3)
-                    loading_container.markdown(render_loading_html(1, 1, 20), unsafe_allow_html=True)
+                    from src.explainability.shap_explainer import explain_prediction
 
-                    # Stage 2-3 (actual computation)
-                    time.sleep(0.15)
-                    loading_container.markdown(render_loading_html(2, 2, 50), unsafe_allow_html=True)
-
+                    loading_container.markdown(render_loading_html(1, 1, 30), unsafe_allow_html=True)
                     result = explain_prediction(review_input)
                     st.session_state["prediction_result"] = result
 
-                    loading_container.markdown(render_loading_html(3, 3, 75), unsafe_allow_html=True)
-                    time.sleep(0.3)
-
-                    loading_container.markdown(render_loading_html(4, 4, 90), unsafe_allow_html=True)
-                    time.sleep(0.2)
-
+                    loading_container.markdown(render_loading_html(5, 5, 100), unsafe_allow_html=True)
                     loading_container.empty()
 
                 except Exception as e:
@@ -1343,12 +1401,9 @@ try:
             st.markdown(
                 f"""
             <div style="margin-top: 2rem;" class="anim-fade-up">
-                <div style="display: grid; grid-template-columns: 340px 1fr; gap: 1.5rem;">
+                <div class="result-grid" style="display: grid; grid-template-columns: minmax(300px, 1fr) 2fr; gap: 1.5rem;">
                     <div class="glass-card">
-                        <p style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;
-                                  color: var(--text-muted); margin-bottom: 1rem; font-weight: 600;">
-                            Prediction Result
-                        </p>
+                        <p class="section-label">Prediction Result</p>
                         <div style="margin-bottom: 1.2rem;">
                             {render_sentiment_badge(label)}
                         </div>
@@ -1374,10 +1429,7 @@ try:
                     </div>
 
                     <div class="glass-card">
-                        <p style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;
-                                  color: var(--text-muted); margin-bottom: 1.2rem; font-weight: 600;">
-                            Class Probability Distribution
-                        </p>
+                        <p class="section-label">Class Probability Distribution</p>
                         {prob_bars_html}
                         <div style="margin-top: 1.2rem; padding-top: 1rem; border-top: 1px solid var(--border);">
                             <p style="font-size: 0.78rem; color: var(--text-muted);">
@@ -1428,10 +1480,7 @@ try:
             st.markdown(
                 f"""
             <div class="glass-card anim-fade-up" style="margin-bottom: 1.5rem;">
-                <p style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em;
-                          color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 600;">
-                    Analyzed Text
-                </p>
+                <p class="section-label">Analyzed Text</p>
                 <p style="font-size: 0.92rem; color: var(--text-secondary); line-height: 1.6;">
                     {sanitize_html(st.session_state['review_text'])}
                 </p>
@@ -1449,7 +1498,7 @@ try:
             # Generate SHAP plots
             with st.spinner("Computing SHAP visualizations..."):
                 try:
-                    explainer = SHAPExplainer()
+                    explainer = get_shap_explainer()
                     explainer.generate_plots(res, prefix="dashboard")
                 except Exception as e:
                     st.error(f"SHAP generation failed: {e}")
@@ -1473,37 +1522,47 @@ try:
                 )
 
             # Waterfall plot
-            waterfall_path = SHAP_DIR / "dashboard_waterfall.png"
+            shap_dir = REPORTS_DIR / "shap"
+            waterfall_file = shap_dir / "dashboard_waterfall.png"
             with st.expander("SHAP Waterfall Plot", expanded=True):
-                if waterfall_path.exists():
-                    img = Image.open(str(waterfall_path))
-                    st.image(img, use_container_width=True)
-                    with open(waterfall_path, "rb") as f:
-                        st.download_button(
-                            "Download Waterfall Plot",
-                            data=f.read(),
-                            file_name="shap_waterfall.png",
-                            mime="image/png",
-                        )
+                if waterfall_file.exists():
+                    img = load_image_safe(waterfall_file)
+                    if img:
+                        st.image(img, use_container_width=True)
+                        with open(waterfall_file, "rb") as f:
+                            st.download_button(
+                                "Download Waterfall Plot",
+                                data=f.read(),
+                                file_name="shap_waterfall.png",
+                                mime="image/png",
+                            )
+                    else:
+                        st.info("Waterfall plot could not be loaded.")
                 else:
-                    st.info("Waterfall plot not available.")
+                    st.info("Waterfall plot not available. Run a prediction first.")
 
             # Bar plot
-            bar_path = SHAP_DIR / "dashboard_bar_summary.png"
+            bar_file = shap_dir / "dashboard_bar_summary.png"
             with st.expander("SHAP Bar Summary", expanded=False):
-                if bar_path.exists():
-                    bar_img = Image.open(str(bar_path))
-                    st.image(bar_img, use_container_width=True)
+                if bar_file.exists():
+                    bar_img = load_image_safe(bar_file)
+                    if bar_img:
+                        st.image(bar_img, use_container_width=True)
+                    else:
+                        st.info("Bar summary plot could not be loaded.")
                 else:
                     st.info("Bar summary plot not available.")
 
             # Text HTML
-            text_path = SHAP_DIR / "dashboard_text.html"
+            text_file = shap_dir / "dashboard_text.html"
             with st.expander("Token Impact Visualization", expanded=False):
-                if text_path.exists():
-                    with open(text_path, "r", encoding="utf-8") as f:
-                        html_str = f.read()
-                    components.html(html_str, height=280, scrolling=True)
+                if text_file.exists():
+                    try:
+                        with open(text_file, "r", encoding="utf-8") as f:
+                            html_str = f.read()
+                        components.html(html_str, height=280, scrolling=True)
+                    except Exception as e:
+                        st.info(f"Could not load text visualization: {e}")
                 else:
                     st.info("Text visualization not available.")
 
@@ -1575,15 +1634,7 @@ try:
 
         with col_left:
             # Performance metrics
-            st.markdown(
-                """
-            <p style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;
-                      color: var(--text-muted); margin-bottom: 1rem; font-weight: 600;">
-                Performance Metrics
-            </p>
-            """,
-                unsafe_allow_html=True,
-            )
+            st.markdown('<p class="section-label">Performance Metrics</p>', unsafe_allow_html=True)
             metrics_df = load_metrics()
             if metrics_df is not None:
                 for col_name in metrics_df.columns:
@@ -1643,18 +1694,10 @@ try:
 
         with col_right:
             # Confusion matrix
-            st.markdown(
-                """
-            <p style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;
-                      color: var(--text-muted); margin-bottom: 1rem; font-weight: 600;">
-                Confusion Matrix
-            </p>
-            """,
-                unsafe_allow_html=True,
-            )
+            st.markdown('<p class="section-label">Confusion Matrix</p>', unsafe_allow_html=True)
             cm_path = REPORTS_DIR / "confusion_matrix.png"
-            if cm_path.exists():
-                cm_img = Image.open(str(cm_path))
+            cm_img = load_image_safe(cm_path)
+            if cm_img:
                 st.image(cm_img, use_container_width=True)
             else:
                 st.info("Confusion matrix not found. Run model evaluation first.")
@@ -1663,9 +1706,12 @@ try:
             report_path = REPORTS_DIR / "classification_report.txt"
             if report_path.exists():
                 with st.expander("Classification Report", expanded=False):
-                    with open(report_path, "r") as f:
-                        report_text = f.read()
-                    st.code(report_text, language=None)
+                    try:
+                        with open(report_path, "r") as f:
+                            report_text = f.read()
+                        st.code(report_text, language=None)
+                    except Exception as e:
+                        st.info(f"Could not load classification report: {e}")
 
         # Footer
         st.markdown(render_footer(), unsafe_allow_html=True)
@@ -1853,17 +1899,9 @@ try:
 
         # Architecture image
         arch_path = PROJECT_ROOT / "assets" / "architecture.png"
-        if arch_path.exists():
-            st.markdown(
-                """
-            <p style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;
-                      color: var(--text-muted); margin-bottom: 1rem; font-weight: 600;">
-                System Architecture
-            </p>
-            """,
-                unsafe_allow_html=True,
-            )
-            arch_img = Image.open(str(arch_path))
+        arch_img = load_image_safe(arch_path)
+        if arch_img:
+            st.markdown('<p class="section-label">System Architecture</p>', unsafe_allow_html=True)
             st.image(arch_img, use_container_width=True)
 
         st.markdown('<hr class="premium-divider">', unsafe_allow_html=True)
@@ -1887,11 +1925,11 @@ try:
                         text-decoration: none; font-size: 0.82rem; font-weight: 500;">
                         GitHub Repository
                     </a>
-                    <a href="#" target="_blank" style="
+                    <a href="https://www.linkedin.com/in/nikhilkhetavath-ai" target="_blank" style="
                         display: inline-block; background: var(--bg-card-hover); border: 1px solid var(--border);
                         border-radius: var(--radius-xs); padding: 8px 16px; color: var(--text-primary);
                         text-decoration: none; font-size: 0.82rem; font-weight: 500;">
-                        Portfolio Website
+                        LinkedIn Profile
                     </a>
                 </div>
             </div>

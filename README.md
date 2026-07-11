@@ -447,7 +447,7 @@ StartupPulse AI uses **SHAP (SHapley Additive exPlanations)** to provide transpa
 
 ## Dataset
 
-The model was trained on **66,557 employee reviews** sourced from major technology companies.
+The model was trained on **66,557 employee reviews** sourced from major technology companies. The training data is available in `data/processed/` with a stratified 80/10/10 split.
 
 ### Split Distribution
 
