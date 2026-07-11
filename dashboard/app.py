@@ -98,15 +98,22 @@ st.markdown(
     --transition: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* ---------- FORCE LIGHT THEME OVERRIDES ---------- */
+html, body, [data-testid="stAppViewContainer"],
+.stApp, .main, section.main, section.main > div,
+[data-testid="stHeader"], [data-testid="stToolbar"],
+[data-testid="ScrollToBottomContainer"] {
+    background-color: #f1f5f9 !important;
+    background-image: none !important;
+    color: #1e293b !important;
+}
+
 /* ---------- MESH BACKGROUND ---------- */
-.stApp, .main, [data-testid="stAppViewContainer"],
-[data-testid="stHeader"], section.main {
-    background: var(--bg) !important;
-    color: var(--text) !important;
-    font-family: 'Satoshi', -apple-system, sans-serif !important;
+section.main {
+    background: #f1f5f9 !important;
     position: relative;
 }
-.stApp::before, section.main::before {
+section.main::before {
     content: '';
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -118,18 +125,58 @@ st.markdown(
     pointer-events: none;
     z-index: 0;
 }
-section.main > div { padding: 24px 28px 48px 28px; position: relative; z-index: 1; }
+section.main > div {
+    padding: 24px 28px 48px 28px;
+    position: relative;
+    z-index: 1;
+}
+.stApp {
+    background: #f1f5f9 !important;
+}
 
 /* ---------- HIDE DEFAULT ELEMENTS ---------- */
 #MainMenu { visibility: hidden; }
 footer { visibility: hidden; }
 [data-testid="stDecoration"] { display: none; }
-header[data-testid="stHeader"] { background: transparent !important; }
+
+/* ---------- STREAMLIT COMPONENT OVERRIDES (light theme) ---------- */
+.stMarkdown, .stMarkdown p, .stMarkdown li, .stMarkdown span,
+[data-testid="stMarkdownContainer"], [data-testid="stMarkdownContainer"] p,
+[data-testid="stVerticalBlock"] p, [data-testid="stVerticalBlock"] li {
+    color: #1e293b !important;
+}
+.stMarkdown h1, .stMarkdown h2, .stMarkdown h3, .stMarkdown h4,
+[data-testid="stMarkdownContainer"] h1,
+[data-testid="stMarkdownContainer"] h2,
+[data-testid="stMarkdownContainer"] h3 {
+    color: #1e293b !important;
+    font-family: 'Cabinet Grotesk', -apple-system, sans-serif !important;
+    letter-spacing: -0.03em !important;
+}
+
+/* Radio / Checkbox labels */
+.stRadio label, .stRadio div[role="radiogroup"] label,
+.stCheckbox label, .stCheckbox span {
+    color: #1e293b !important;
+}
+
+/* Info / Warning / Error boxes */
+.stAlert, [data-testid="stAlert"] {
+    background: rgba(255,255,255,0.72) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    color: #1e293b !important;
+    border-left-width: 3px !important;
+}
+.stAlert[data-baseweb="notification-info"] { border-left-color: #4f46e2 !important; }
+.stAlert[data-baseweb="notification-warning"] { border-left-color: #f59e0b !important; }
+.stAlert[data-baseweb="notification-error"] { border-left-color: #ef4444 !important; }
+.stAlert[data-baseweb="notification-success"] { border-left-color: #10b981 !important; }
 
 /* ---------- HEADINGS ---------- */
-h1, h2, h3, h4, h5, h6, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
+h1, h2, h3, h4, h5, h6 {
     font-family: 'Cabinet Grotesk', -apple-system, sans-serif !important;
-    color: var(--text) !important;
+    color: #1e293b !important;
     letter-spacing: -0.03em !important;
 }
 
@@ -195,15 +242,53 @@ h1, h2, h3, h4, h5, h6, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
 
 /* ---------- SIDEBAR (Streamlit override) ---------- */
 [data-testid="stSidebar"] {
-    background: rgba(255, 255, 255, 0.6) !important;
-    backdrop-filter: var(--blur-sm) !important;
-    -webkit-backdrop-filter: var(--blur-sm) !important;
-    border-right: 1px solid var(--glass-border) !important;
+    background: rgba(255, 255, 255, 0.75) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.5) !important;
     padding: 16px 10px !important;
 }
-[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
-    color: var(--text-secondary) !important;
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p,
+[data-testid="stSidebar"] p,
+[data-testid="stSidebar"] span,
+[data-testid="stSidebar"] label {
+    color: #475569 !important;
     font-size: 12px !important;
+}
+[data-testid="stSidebar"] h1,
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3 {
+    color: #1e293b !important;
+}
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] {
+    color: #475569 !important;
+}
+/* Sidebar radio buttons */
+[data-testid="stSidebar"] .stRadio > div { gap: 4px; }
+[data-testid="stSidebar"] .stRadio > div > label {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 0.75rem;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: #475569 !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+[data-testid="stSidebar"] .stRadio > div > label:hover {
+    background: rgba(79, 70, 226, 0.06);
+    border-color: rgba(79, 70, 226, 0.1);
+}
+[data-testid="stSidebar"] .stRadio > div > label[data-checked="true"] {
+    background: linear-gradient(135deg, rgba(79,70,226,0.12), rgba(124,58,237,0.12)) !important;
+    border-color: #4f46e2 !important;
+}
+[data-testid="stSidebar"] .stRadio > div > label[data-checked="true"] span {
+    color: #4f46e2 !important;
+    font-weight: 600 !important;
+}
+/* Sidebar divider line */
+[data-testid="stSidebar"] hr {
+    border-color: rgba(255, 255, 255, 0.4) !important;
 }
 
 /* Sidebar brand */
@@ -656,7 +741,7 @@ h1, h2, h3, h4, h5, h6, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
 /* ---------- BUTTONS ---------- */
 .stButton > button {
     background: linear-gradient(135deg, #4f46e2, #7c3aed) !important;
-    color: white !important;
+    color: #ffffff !important;
     border: none !important;
     border-radius: 16px !important;
     font-weight: 600 !important;
@@ -664,7 +749,7 @@ h1, h2, h3, h4, h5, h6, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
     padding: 10px 20px !important;
     font-size: 13px !important;
     letter-spacing: 0.01em;
-    transition: all 0.35s var(--transition) !important;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
     box-shadow: 0 4px 16px rgba(79, 70, 226, 0.2) !important;
     min-height: 40px;
     width: 100%;
@@ -680,32 +765,35 @@ h1, h2, h3, h4, h5, h6, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
 .stButton > button:active {
     transform: translateY(0) !important;
 }
+.stButton > button[kind="secondary"],
 [data-testid="stBaseButton-secondary"] {
-    background: var(--glass) !important;
+    background: rgba(255, 255, 255, 0.72) !important;
     backdrop-filter: blur(12px) !important;
-    color: var(--text) !important;
-    border: 1px solid var(--glass-border) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    color: #1e293b !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
     border-radius: 16px !important;
     font-size: 13px !important;
     font-weight: 500 !important;
     min-height: 40px;
 }
 [data-testid="stBaseButton-secondary"]:hover {
-    border-color: var(--primary) !important;
+    border-color: #4f46e2 !important;
     background: rgba(255, 255, 255, 0.85) !important;
     transform: translateY(-1px) !important;
 }
 .stDownloadButton > button {
-    background: var(--glass) !important;
+    background: rgba(255, 255, 255, 0.72) !important;
     backdrop-filter: blur(12px) !important;
-    color: var(--text) !important;
-    border: 1px solid var(--glass-border) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    color: #1e293b !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
     border-radius: 16px !important;
     font-weight: 500 !important;
     font-size: 12px !important;
 }
 .stDownloadButton > button:hover {
-    border-color: var(--primary) !important;
+    border-color: #4f46e2 !important;
     background: rgba(255, 255, 255, 0.85) !important;
 }
 
@@ -713,16 +801,23 @@ h1, h2, h3, h4, h5, h6, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
 .stTextArea textarea {
     background: rgba(255, 255, 255, 0.7) !important;
     backdrop-filter: blur(12px) !important;
-    border: 1px solid var(--glass-border) !important;
-    border-radius: var(--radius-sm) !important;
-    color: var(--text) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    border-radius: 1rem !important;
+    color: #1e293b !important;
     font-family: 'Satoshi', monospace !important;
     font-size: 13px !important;
     padding: 14px !important;
 }
 .stTextArea textarea:focus {
-    border-color: var(--primary) !important;
+    border-color: #4f46e2 !important;
     box-shadow: 0 0 0 3px rgba(79, 70, 226, 0.12) !important;
+}
+.stTextArea textarea::placeholder {
+    color: #94a3b8 !important;
+}
+.stTextArea label {
+    color: #1e293b !important;
 }
 
 /* ---------- DATAFRAME ---------- */
@@ -770,53 +865,120 @@ h1, h2, h3, h4, h5, h6, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
 [data-testid="stSelectbox"] div div div,
 [data-testid="stMultiSelect"] div div div {
     background: rgba(255, 255, 255, 0.7) !important;
-    color: var(--text) !important;
+    color: #1e293b !important;
     backdrop-filter: blur(12px) !important;
 }
 [data-testid="stSelectbox"] [data-baseweb="select"] {
     background: rgba(255, 255, 255, 0.7) !important;
-    border-color: var(--glass-border) !important;
+    border-color: rgba(255, 255, 255, 0.5) !important;
+    color: #1e293b !important;
 }
-[data-baseweb="menu"] { background: white !important; }
+[data-baseweb="menu"] {
+    background: #ffffff !important;
+    color: #1e293b !important;
+}
 [data-baseweb="option"] {
-    background: white !important;
-    color: var(--text) !important;
+    background: #ffffff !important;
+    color: #1e293b !important;
 }
 [data-baseweb="option"]:hover, [data-baseweb="option"]:focus,
 [data-baseweb="option"][aria-selected="true"] {
     background: rgba(79, 70, 226, 0.08) !important;
-    color: var(--primary) !important;
+    color: #4f46e2 !important;
+}
+[data-baseweb="input"] {
+    background: rgba(255,255,255,0.7) !important;
+    color: #1e293b !important;
+}
+[data-baseweb="input"] input {
+    color: #1e293b !important;
+}
+[data-baseweb="textarea"] {
+    background: rgba(255,255,255,0.7) !important;
+    color: #1e293b !important;
+}
+[data-baseweb="textarea"] textarea {
+    color: #1e293b !important;
 }
 .stRadio label, .stRadio div[role="radiogroup"] label {
-    color: var(--text) !important;
+    color: #1e293b !important;
 }
 .stCheckbox label, .stCheckbox span {
-    color: var(--text) !important;
+    color: #1e293b !important;
 }
 [data-testid="stVerticalBlock"] p {
-    color: var(--text-secondary) !important;
+    color: #64748b !important;
+}
+[data-testid="stVerticalBlock"] span {
+    color: #1e293b !important;
+}
+
+/* ---------- SPINNER ---------- */
+.stSpinner > div {
+    border-color: #4f46e2 transparent transparent transparent !important;
+}
+
+/* ---------- TABS ---------- */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(12px);
+    border-radius: var(--radius-sm);
+    padding: 4px;
+    border: 1px solid var(--glass-border);
+}
+.stTabs [data-baseweb="tab"] {
+    border-radius: var(--radius-xs) !important;
+    font-weight: 500;
+    font-size: 13px;
+    font-family: 'Cabinet Grotesk', sans-serif;
+    color: #64748b !important;
+}
+.stTabs [aria-selected="true"] {
+    background: white !important;
+    color: #4f46e2 !important;
+    box-shadow: var(--shadow-sm) !important;
 }
 
 /* ---------- EXPANDER ---------- */
 [data-testid="stExpander"] {
-    background: var(--glass) !important;
-    backdrop-filter: var(--blur) !important;
-    border: 1px solid var(--glass-border) !important;
+    background: rgba(255, 255, 255, 0.72) !important;
+    backdrop-filter: blur(28px) !important;
+    -webkit-backdrop-filter: blur(28px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
     border-radius: var(--radius-md) !important;
 }
 [data-testid="stExpander"] summary {
     font-weight: 600 !important;
     font-size: 13px !important;
     font-family: 'Cabinet Grotesk', sans-serif !important;
+    color: #1e293b !important;
+}
+[data-testid="stExpander"] p, [data-testid="stExpander"] span {
+    color: #1e293b !important;
+}
+
+/* ---------- DATAFRAME ---------- */
+.stDataFrame, [data-testid="stDataFrame"] {
+    border-radius: var(--radius-sm) !important;
+    overflow: hidden;
+    border: 1px solid var(--glass-border) !important;
+    background: rgba(255, 255, 255, 0.72) !important;
 }
 
 /* ---------- LINK ---------- */
-a[href] { color: var(--primary) !important; }
+a[href] { color: #4f46e2 !important; }
 
 /* ---------- SCROLLBAR ---------- */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(79, 70, 226, 0.15); border-radius: 10px; }
+
+/* ---------- STREAMLIT HEADER (keep sidebar toggle visible) ---------- */
+[data-testid="stHeader"] {
+    background: transparent !important;
+    z-index: 100 !important;
+}
 
 /* ---------- PAGE HEADING ---------- */
 .page-heading { margin-bottom: 24px; }
