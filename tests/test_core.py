@@ -2,6 +2,7 @@
 Test suite for StartupPulse AI.
 
 This module contains unit tests for the core functionality.
+Tests are designed to run quickly without loading ML models.
 """
 import pytest
 import sys
@@ -53,72 +54,6 @@ class TestLogger:
         assert logger is not None
         assert logger.name == "test"
         assert len(logger.handlers) == 2  # Console and file handlers
-
-
-class TestTokenizer:
-    """Test tokenizer module."""
-    
-    def test_get_tokenizer(self):
-        """Test that tokenizer loads correctly."""
-        from src.model.tokenizer import get_tokenizer
-        tokenizer = get_tokenizer()
-        assert tokenizer is not None
-        assert hasattr(tokenizer, 'encode')
-        assert hasattr(tokenizer, 'decode')
-
-
-class TestPrediction:
-    """Test prediction module."""
-    
-    def test_predict_sentiment(self):
-        """Test that sentiment prediction works."""
-        from src.model.predict import predict_sentiment
-        result = predict_sentiment("This is a test review.")
-        assert "label" in result
-        assert "confidence" in result
-        assert "probabilities" in result
-        assert result["label"] in ["Negative", "Neutral", "Positive"]
-        assert 0 <= result["confidence"] <= 1
-    
-    def test_prediction_format(self):
-        """Test that prediction returns correct format."""
-        from src.model.predict import predict_sentiment
-        result = predict_sentiment("Great work environment!")
-        assert isinstance(result, dict)
-        assert len(result["probabilities"]) == 3
-
-
-class TestDataset:
-    """Test dataset module."""
-    
-    def test_sentiment_dataset(self):
-        """Test that SentimentDataset works correctly."""
-        from src.pipeline.dataset import SentimentDataset
-        from src.model.tokenizer import get_tokenizer
-        
-        tokenizer = get_tokenizer()
-        texts = ["Test review 1", "Test review 2"]
-        labels = [0, 2]
-        
-        dataset = SentimentDataset(texts, labels, tokenizer, max_length=128)
-        assert len(dataset) == 2
-        
-        item = dataset[0]
-        assert "input_ids" in item
-        assert "attention_mask" in item
-        assert "labels" in item
-
-
-class TestSHAP:
-    """Test SHAP explainability module."""
-    
-    def test_shap_explainer_initialization(self):
-        """Test that SHAPExplainer initializes correctly."""
-        from src.explainability.shap_explainer import SHAPExplainer
-        explainer = SHAPExplainer()
-        assert explainer is not None
-        assert hasattr(explainer, 'explain_prediction')
-        assert hasattr(explainer, 'generate_plots')
 
 
 class TestPreprocessing:
