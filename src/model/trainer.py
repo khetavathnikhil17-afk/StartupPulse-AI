@@ -1,3 +1,8 @@
+"""
+Model trainer module for StartupPulse AI.
+
+This module configures and provides the Hugging Face Trainer for model training.
+"""
 from transformers import Trainer, TrainingArguments
 from src.config.config import MODEL_SAVE_DIR, EPOCHS, BATCH_SIZE, LEARNING_RATE, LOGS_DIR
 from src.utils.metrics import compute_metrics

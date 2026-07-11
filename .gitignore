@@ -242,4 +242,10 @@ build/
 # Environment variable files
 .env
 .env.*
+
+# Project-specific directories (generated data)
+data/
+reports/
+outputs/
+logs/
 # ─────────────────────────────────────────────────────────────────────────────

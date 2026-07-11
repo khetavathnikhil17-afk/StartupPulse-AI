@@ -1,3 +1,8 @@
+"""
+Dataset preparation module for StartupPulse AI.
+
+This module handles loading, splitting, and preparing data for training.
+"""
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from src.config.config import RAW_DATA_PATH, TRAIN_DATA_PATH, TEST_DATA_PATH, VALIDATION_DATA_PATH, SEED
