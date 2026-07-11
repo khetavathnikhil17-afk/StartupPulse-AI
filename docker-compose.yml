@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  startuppulse-ai:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: startuppulse-ai
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./reports:/app/reports
+    environment:
+      - CUDA_VISIBLE_DEVICES=0
+      - TOKENIZERS_PARALLELISM=false
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Optional: GPU support
+  # startuppulse-ai-gpu:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.gpu
+  #   container_name: startuppulse-ai-gpu
+  #   ports:
+  #     - "8501:8501"
+  #   volumes:
+  #     - ./data:/app/data
+  #     - ./models:/app/models
+  #     - ./reports:/app/reports
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: 1
+  #             capabilities: [gpu]
+  #   environment:
+  #     - CUDA_VISIBLE_DEVICES=0
+  #   restart: unless-stopped

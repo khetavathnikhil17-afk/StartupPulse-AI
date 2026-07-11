@@ -1,3 +1,9 @@
+"""
+Sentiment prediction module for StartupPulse AI.
+
+This module provides a singleton-based sentiment predictor using the
+fine-tuned DeBERTa-v3 model.
+"""
 import torch
 import torch.nn.functional as F
 from transformers import AutoModelForSequenceClassification
@@ -7,8 +13,16 @@ from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
+
 class SentimentPredictor:
+    """
+    Singleton sentiment predictor using DeBERTa-v3.
+    
+    Automatically downloads the base model if fine-tuned model is not available.
+    """
+    
     def __init__(self):
+        """Initialize the predictor with model and tokenizer."""
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.tokenizer = get_tokenizer()
         
@@ -18,15 +32,25 @@ class SentimentPredictor:
             
         if not (MODEL_SAVE_DIR / "config.json").exists():
             logger.warning(f"Model not found at {MODEL_SAVE_DIR}. Downloading base model...")
-            model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME, num_labels=NUM_LABELS)
+            model = AutoModelForSequenceClassification.from_pretrained(
+                MODEL_NAME, num_labels=NUM_LABELS
+            )
             model.save_pretrained(str(MODEL_SAVE_DIR))
             
         self.model = AutoModelForSequenceClassification.from_pretrained(str(MODEL_SAVE_DIR))
         self.model.to(self.device)
         self.model.eval()
 
-    def predict(self, text: str):
-        """Predicts sentiment for a given text."""
+    def predict(self, text: str) -> dict:
+        """
+        Predict sentiment for a given text.
+        
+        Args:
+            text: Input text to classify
+            
+        Returns:
+            dict: Contains label, confidence, and probability distribution
+        """
         inputs = self.tokenizer(
             text,
             return_tensors="pt",
@@ -50,15 +74,26 @@ class SentimentPredictor:
             "probabilities": {SENTIMENT_MAPPING[i]: p for i, p in enumerate(probs)}
         }
 
+
 # Global predictor instance for reuse
 _predictor = None
 
-def predict_sentiment(text: str):
-    """Wrapper function for sentiment prediction."""
+
+def predict_sentiment(text: str) -> dict:
+    """
+    Wrapper function for sentiment prediction.
+    
+    Args:
+        text: Input text to classify
+        
+    Returns:
+        dict: Contains label, confidence, and probability distribution
+    """
     global _predictor
     if _predictor is None:
         _predictor = SentimentPredictor()
     return _predictor.predict(text)
+
 
 if __name__ == "__main__":
     sample_text = "This startup is a fantastic place to grow!"

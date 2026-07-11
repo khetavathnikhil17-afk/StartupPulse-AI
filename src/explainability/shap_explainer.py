@@ -1,10 +1,15 @@
+"""
+SHAP Explainability module for StartupPulse AI.
+
+This module provides SHAP-based explanations for sentiment predictions
+using the DeBERTa-v3 transformer model.
+"""
 import torch
 import numpy as np
 import shap
 import matplotlib.pyplot as plt
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
-from pathlib import Path
-from src.config.config import MODEL_SAVE_DIR, SENTIMENT_MAPPING, REPORTS_DIR, MODEL_NAME
+from src.config.config import MODEL_SAVE_DIR, SENTIMENT_MAPPING, REPORTS_DIR, MODEL_NAME, MAX_LENGTH, NUM_LABELS
 from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -13,21 +18,27 @@ logger = get_logger(__name__)
 SHAP_DIR = REPORTS_DIR / "shap"
 SHAP_DIR.mkdir(parents=True, exist_ok=True)
 
+
 class SHAPExplainer:
     """
     Explainable AI (XAI) module using SHAP for DeBERTa-v3 sentiment classification.
+    
     Automatically handles CPU/GPU execution and generates visualization plots.
+    Uses a singleton pattern for efficient resource utilization.
     """
+    
     def __init__(self):
-        """Initializes the tokenizer, model, and SHAP explainer."""
+        """Initialize the tokenizer, model, and SHAP explainer."""
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         logger.info(f"Initializing SHAPExplainer on device: {self.device}")
         
         # Verify model directory exists
         if not MODEL_SAVE_DIR.exists() or not (MODEL_SAVE_DIR / "config.json").exists():
-            logger.warning(f"Model not found at {MODEL_SAVE_DIR}. Downloading base model for testing...")
+            logger.warning(f"Model not found at {MODEL_SAVE_DIR}. Downloading base model...")
             MODEL_SAVE_DIR.mkdir(parents=True, exist_ok=True)
-            self.model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME, num_labels=3)
+            self.model = AutoModelForSequenceClassification.from_pretrained(
+                MODEL_NAME, num_labels=NUM_LABELS
+            )
             self.model.save_pretrained(str(MODEL_SAVE_DIR))
             self.tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
             self.tokenizer.save_pretrained(str(MODEL_SAVE_DIR))
@@ -41,15 +52,15 @@ class SHAPExplainer:
         # Build SHAP explainer for transformers text models
         self.explainer = shap.Explainer(self._predict_func, self.tokenizer)
 
-    def _predict_func(self, texts):
+    def _predict_func(self, texts) -> np.ndarray:
         """
         Internal inference function for SHAP that outputs probabilities.
         
         Args:
-            texts (list): List of input texts.
+            texts: List of input texts or numpy array
             
         Returns:
-            np.ndarray: Matrix of class probabilities.
+            np.ndarray: Matrix of class probabilities
         """
         if isinstance(texts, np.ndarray):
             texts = texts.tolist()
@@ -59,7 +70,7 @@ class SHAPExplainer:
             return_tensors="pt",
             truncation=True,
             padding=True,
-            max_length=128
+            max_length=MAX_LENGTH
         )
         inputs = {k: v.to(self.device) for k, v in inputs.items()}
         
@@ -70,16 +81,16 @@ class SHAPExplainer:
             
         return probs.cpu().numpy()
 
-    def explain_prediction(self, text: str):
+    def explain_prediction(self, text: str) -> dict:
         """
-        Explains a single prediction using SHAP.
+        Generate SHAP explanation for a single prediction.
         
         Args:
-            text (str): The input text to explain.
+            text: The input text to explain
             
         Returns:
             dict: Dictionary containing predicted label, confidence, probability distribution, 
-                  SHAP values, and token importance.
+                  SHAP values, and token importance
         """
         logger.info("Generating explanation for text...")
         
@@ -113,13 +124,13 @@ class SHAPExplainer:
             logger.error(f"SHAP computation failed: {e}")
             raise RuntimeError(f"Failed to generate SHAP explanation: {e}")
 
-    def generate_plots(self, explanation_result, prefix="plot"):
+    def generate_plots(self, explanation_result: dict, prefix: str = "plot") -> None:
         """
-        Generates and saves Waterfall, Text, and Bar (Summary) plots.
+        Generate and save Waterfall, Text, and Bar (Summary) plots.
         
         Args:
-            explanation_result (dict): The output from explain_prediction().
-            prefix (str): Prefix for the saved plot filenames.
+            explanation_result: The output from explain_prediction()
+            prefix: Prefix for the saved plot filenames
         """
         shap_values = explanation_result["shap_values"]
         pred_idx = explanation_result["predicted_class_index"]
@@ -164,18 +175,21 @@ class SHAPExplainer:
         except Exception as e:
             logger.error(f"Failed to generate Text plot: {e}")
 
+
 # Reusable function as requested
 _global_explainer = None
 
-def explain_prediction(text: str):
+
+def explain_prediction(text: str) -> dict:
     """
     Main reusable interface for generating SHAP predictions.
     
     Args:
-        text (str): Input text to explain.
+        text: Input text to explain
         
     Returns:
-        dict: Contains label, confidence, SHAP values, token importance, and probability distribution.
+        dict: Contains label, confidence, SHAP values, token importance, 
+              and probability distribution
     """
     global _global_explainer
     if _global_explainer is None:

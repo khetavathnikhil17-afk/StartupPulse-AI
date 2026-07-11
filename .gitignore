@@ -217,10 +217,15 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-# Ignore trained model
+# Ignore trained model weights (large files)
 models/deberta_v3/model.safetensors
 
 # ── StartupPulse AI – project-specific ignores ───────────────────────────────
+
+# Build artifacts
+*.egg-info/
+dist/
+build/
 
 # Git backup artifacts
 .git_backup/
@@ -228,17 +233,11 @@ models/deberta_v3/model.safetensors
 # Virtual environment (with trailing slash)
 .venv/
 
-# Generated output directories
-reports/
-logs/
-outputs/
-
 # Model checkpoint / binary weight files
 *.ckpt
 *.bin
 *.pt
 *.pth
-*.safetensors
 
 # Environment variable files
 .env

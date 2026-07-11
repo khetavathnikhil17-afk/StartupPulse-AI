@@ -18,3 +18,4 @@ seaborn==0.13.2
 
 # Utilities
 tqdm==4.66.2
+Pillow==10.2.0

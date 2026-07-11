@@ -1,10 +1,23 @@
+"""
+Logging configuration module for StartupPulse AI.
+
+This module provides a centralized logging setup with console and file handlers.
+"""
 import logging
 import sys
-from pathlib import Path
-from src.config.config import LOGS_DIR
+from src.config.config import LOGS_DIR, LOG_FILENAME
+
 
 def get_logger(name: str) -> logging.Logger:
-    """Configures and returns a logger instance."""
+    """
+    Configure and return a logger instance.
+    
+    Args:
+        name: Logger name (typically __name__)
+        
+    Returns:
+        Configured logger with console and file handlers
+    """
     logger = logging.getLogger(name)
     logger.setLevel(logging.INFO)
 
@@ -21,7 +34,7 @@ def get_logger(name: str) -> logging.Logger:
     logger.addHandler(ch)
 
     # File Handler
-    log_file = LOGS_DIR / "app.log"
+    log_file = LOGS_DIR / LOG_FILENAME
     fh = logging.FileHandler(log_file)
     fh.setFormatter(formatter)
     logger.addHandler(fh)

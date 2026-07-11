@@ -1,3 +1,9 @@
+"""
+Project configuration constants and paths.
+
+This module centralizes all configuration settings for StartupPulse AI,
+including file paths, model hyperparameters, and sentiment mappings.
+"""
 from pathlib import Path
 
 # Base Paths
@@ -26,6 +32,7 @@ MAX_LENGTH = 128
 BATCH_SIZE = 16
 EPOCHS = 3
 LEARNING_RATE = 2e-5
+EARLY_STOPPING_PATIENCE = 3
 
 # Explainability
 SHAP_SAMPLES = 100
@@ -41,3 +48,6 @@ NUM_LABELS = len(SENTIMENT_MAPPING)
 
 # Random Seed
 SEED = 42
+
+# Logging
+LOG_FILENAME = "app.log"

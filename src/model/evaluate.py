@@ -1,17 +1,28 @@
+"""
+Model evaluation module for StartupPulse AI.
+
+This module evaluates the trained sentiment analysis model on test data.
+"""
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, precision_recall_fscore_support
 from tqdm import tqdm
-from src.config.config import TEST_DATA_PATH, REPORTS_DIR, SENTIMENT_MAPPING
+from src.config.config import TEST_DATA_PATH, REPORTS_DIR, SENTIMENT_MAPPING, INVERSE_SENTIMENT_MAPPING
 from src.model.predict import predict_sentiment
 from src.utils.logger import get_logger
 from src.pipeline.prepare_dataset import prepare_data
 
 logger = get_logger(__name__)
 
-def evaluate_model():
+
+def evaluate_model() -> dict:
+    """
+    Evaluate the trained model on test data.
+    
+    Returns:
+        Dictionary containing accuracy, precision, recall, and F1 score.
+    """
     if not TEST_DATA_PATH.exists():
         logger.info("Test data not found, preparing data...")
         prepare_data()
@@ -23,21 +34,25 @@ def evaluate_model():
     pred_labels = []
     
     logger.info("Running predictions on test set...")
-    inv_map = {v: k for k, v in SENTIMENT_MAPPING.items()}
     
     for text in tqdm(df["review"], desc="Evaluating"):
         res = predict_sentiment(text)
-        pred_labels.append(inv_map[res["label"]])
+        pred_labels.append(INVERSE_SENTIMENT_MAPPING[res["label"]])
 
     acc = accuracy_score(true_labels, pred_labels)
-    precision, recall, f1, _ = precision_recall_fscore_support(true_labels, pred_labels, average="weighted", zero_division=0)
+    precision, recall, f1, _ = precision_recall_fscore_support(
+        true_labels, pred_labels, average="weighted", zero_division=0
+    )
     
     logger.info(f"Accuracy: {acc:.4f}, Precision: {precision:.4f}, Recall: {recall:.4f}, F1: {f1:.4f}")
     
-    target_names = ["Negative", "Neutral", "Positive"]
-    labels_list = [0, 1, 2]
+    target_names = list(SENTIMENT_MAPPING.values())
+    labels_list = list(SENTIMENT_MAPPING.keys())
     
-    report = classification_report(true_labels, pred_labels, labels=labels_list, target_names=target_names, zero_division=0)
+    report = classification_report(
+        true_labels, pred_labels, labels=labels_list, 
+        target_names=target_names, zero_division=0
+    )
     
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
     with open(REPORTS_DIR / "classification_report.txt", "w") as f:
@@ -62,5 +77,13 @@ def evaluate_model():
     
     logger.info(f"Evaluation artifacts saved in {REPORTS_DIR}")
     
+    return {
+        "accuracy": acc,
+        "precision": precision,
+        "recall": recall,
+        "f1": f1
+    }
+
+
 if __name__ == "__main__":
     evaluate_model()

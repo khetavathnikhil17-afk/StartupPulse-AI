@@ -1,21 +1,27 @@
 import streamlit as st
 import pandas as pd
 import sys
-import os
+import time
 from PIL import Image
 from pathlib import Path
 import streamlit.components.v1 as components
+import html
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.append(str(PROJECT_ROOT))
 
 from src.explainability.shap_explainer import explain_prediction, SHAPExplainer, SHAP_DIR
-from src.config.config import REPORTS_DIR, TRAIN_DATA_PATH, VALIDATION_DATA_PATH, TEST_DATA_PATH
+from src.config.config import REPORTS_DIR, TRAIN_DATA_PATH, VALIDATION_DATA_PATH, TEST_DATA_PATH, SENTIMENT_MAPPING
 from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-APP_VERSION = "v1.2.1"
+APP_VERSION = "v1.3.0"
+
+
+def sanitize_html(text: str) -> str:
+    """Sanitize text for safe HTML injection."""
+    return html.escape(str(text))
 
 st.set_page_config(
     page_title="StartupPulse AI",
@@ -1262,104 +1268,49 @@ try:
                     "Rendering dashboard...",
                 ]
 
-                loading_html = ""
-                for idx, stage_text in enumerate(loading_stages):
-                    loading_html += f"""
-                    <div class="loading-stage" id="load-stage-{idx}">
-                        <div class="loading-dot"></div>
-                        <span>{stage_text}</span>
+                def render_loading_html(completed_count: int, active_idx: int, progress_pct: int) -> str:
+                    """Render loading stages HTML."""
+                    stages_html = ""
+                    for idx, stage_text in enumerate(loading_stages):
+                        if idx < completed_count:
+                            state = "done"
+                        elif idx == active_idx:
+                            state = "active"
+                        else:
+                            state = ""
+                        stages_html += f"""
+                        <div class="loading-stage {state}"><div class="loading-dot"></div><span>{stage_text}</span></div>
+                        """
+                    return f"""
+                    <div class="glass-card" style="margin-top: 1rem;">
+                        <p style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;
+                                  color: var(--text-muted); margin-bottom: 0.8rem; font-weight: 600;">
+                            Processing Pipeline
+                        </p>
+                        {stages_html}
+                        <div class="progress-track"><div class="progress-fill" style="width: {progress_pct}%;"></div></div>
                     </div>
                     """
 
                 loading_container = st.empty()
-                progress_html = f"""
-                <div class="glass-card" style="margin-top: 1rem;">
-                    <p style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;
-                              color: var(--text-muted); margin-bottom: 0.8rem; font-weight: 600;">
-                        Processing Pipeline
-                    </p>
-                    {loading_html}
-                    <div class="progress-track">
-                        <div class="progress-fill" style="width: 0%;"></div>
-                    </div>
-                </div>
-                """
-                loading_container.markdown(progress_html, unsafe_allow_html=True)
-
-                import time
+                loading_container.markdown(render_loading_html(0, 0, 0), unsafe_allow_html=True)
 
                 try:
                     # Stage 1
                     time.sleep(0.3)
-                    stage1_done = """
-                    <div class="glass-card" style="margin-top: 1rem;">
-                        <p style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;
-                                  color: var(--text-muted); margin-bottom: 0.8rem; font-weight: 600;">
-                            Processing Pipeline
-                        </p>
-                        <div class="loading-stage done"><div class="loading-dot"></div><span>Loading DeBERTa-v3 model...</span></div>
-                        <div class="loading-stage active"><div class="loading-dot"></div><span>Tokenizing review...</span></div>
-                        <div class="loading-stage"><div class="loading-dot"></div><span>Running inference...</span></div>
-                        <div class="loading-stage"><div class="loading-dot"></div><span>Generating SHAP explanations...</span></div>
-                        <div class="loading-stage"><div class="loading-dot"></div><span>Rendering dashboard...</span></div>
-                        <div class="progress-track"><div class="progress-fill" style="width: 20%;"></div></div>
-                    </div>
-                    """
-                    loading_container.markdown(stage1_done, unsafe_allow_html=True)
+                    loading_container.markdown(render_loading_html(1, 1, 20), unsafe_allow_html=True)
 
                     # Stage 2-3 (actual computation)
                     time.sleep(0.15)
-                    stage2_done = """
-                    <div class="glass-card" style="margin-top: 1rem;">
-                        <p style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;
-                                  color: var(--text-muted); margin-bottom: 0.8rem; font-weight: 600;">
-                            Processing Pipeline
-                        </p>
-                        <div class="loading-stage done"><div class="loading-dot"></div><span>Loading DeBERTa-v3 model...</span></div>
-                        <div class="loading-stage done"><div class="loading-dot"></div><span>Tokenizing review...</span></div>
-                        <div class="loading-stage active"><div class="loading-dot"></div><span>Running inference...</span></div>
-                        <div class="loading-stage"><div class="loading-dot"></div><span>Generating SHAP explanations...</span></div>
-                        <div class="loading-stage"><div class="loading-dot"></div><span>Rendering dashboard...</span></div>
-                        <div class="progress-track"><div class="progress-fill" style="width: 50%;"></div></div>
-                    </div>
-                    """
-                    loading_container.markdown(stage2_done, unsafe_allow_html=True)
+                    loading_container.markdown(render_loading_html(2, 2, 50), unsafe_allow_html=True)
 
                     result = explain_prediction(review_input)
                     st.session_state["prediction_result"] = result
 
-                    stage3_done = """
-                    <div class="glass-card" style="margin-top: 1rem;">
-                        <p style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;
-                                  color: var(--text-muted); margin-bottom: 0.8rem; font-weight: 600;">
-                            Processing Pipeline
-                        </p>
-                        <div class="loading-stage done"><div class="loading-dot"></div><span>Loading DeBERTa-v3 model...</span></div>
-                        <div class="loading-stage done"><div class="loading-dot"></div><span>Tokenizing review...</span></div>
-                        <div class="loading-stage done"><div class="loading-dot"></div><span>Running inference...</span></div>
-                        <div class="loading-stage active"><div class="loading-dot"></div><span>Generating SHAP explanations...</span></div>
-                        <div class="loading-stage"><div class="loading-dot"></div><span>Rendering dashboard...</span></div>
-                        <div class="progress-track"><div class="progress-fill" style="width: 75%;"></div></div>
-                    </div>
-                    """
-                    loading_container.markdown(stage3_done, unsafe_allow_html=True)
+                    loading_container.markdown(render_loading_html(3, 3, 75), unsafe_allow_html=True)
                     time.sleep(0.3)
 
-                    stage4_done = """
-                    <div class="glass-card" style="margin-top: 1rem;">
-                        <p style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;
-                                  color: var(--text-muted); margin-bottom: 0.8rem; font-weight: 600;">
-                            Processing Pipeline
-                        </p>
-                        <div class="loading-stage done"><div class="loading-dot"></div><span>Loading DeBERTa-v3 model...</span></div>
-                        <div class="loading-stage done"><div class="loading-dot"></div><span>Tokenizing review...</span></div>
-                        <div class="loading-stage done"><div class="loading-dot"></div><span>Running inference...</span></div>
-                        <div class="loading-stage done"><div class="loading-dot"></div><span>Generating SHAP explanations...</span></div>
-                        <div class="loading-stage active"><div class="loading-dot"></div><span>Rendering dashboard...</span></div>
-                        <div class="progress-track"><div class="progress-fill" style="width: 90%;"></div></div>
-                    </div>
-                    """
-                    loading_container.markdown(stage4_done, unsafe_allow_html=True)
+                    loading_container.markdown(render_loading_html(4, 4, 90), unsafe_allow_html=True)
                     time.sleep(0.2)
 
                     loading_container.empty()
@@ -1417,7 +1368,7 @@ try:
                             </p>
                             <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;
                                       max-height: 80px; overflow-y: auto;">
-                                {st.session_state['review_text'][:200]}{'...' if len(st.session_state['review_text']) > 200 else ''}
+                                {sanitize_html(st.session_state['review_text'][:200])}{'...' if len(st.session_state['review_text']) > 200 else ''}
                             </p>
                         </div>
                     </div>
@@ -1482,7 +1433,7 @@ try:
                     Analyzed Text
                 </p>
                 <p style="font-size: 0.92rem; color: var(--text-secondary); line-height: 1.6;">
-                    {st.session_state['review_text']}
+                    {sanitize_html(st.session_state['review_text'])}
                 </p>
                 <div style="margin-top: 0.8rem;">
                     {render_sentiment_badge(res['label'])}
@@ -1684,8 +1635,7 @@ try:
                 unsafe_allow_html=True,
             )
             if stats["classes"]:
-                class_mapping = {0: "Negative", 1: "Neutral", 2: "Positive"}
-                mapped = {class_mapping.get(k, k): v for k, v in stats["classes"].items()}
+                mapped = {SENTIMENT_MAPPING.get(k, k): v for k, v in stats["classes"].items()}
                 dist_df = pd.DataFrame(list(mapped.items()), columns=["Sentiment", "Count"]).set_index("Sentiment")
                 st.bar_chart(dist_df)
             else:
