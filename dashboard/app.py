@@ -489,17 +489,18 @@ footer { visibility: hidden; }
     color: white !important;
     border: none !important;
     border-radius: var(--radius-sm) !important;
-    font-weight: 600 !important;
-    padding: 0.6rem 1.6rem !important;
-    font-size: 0.9rem !important;
-    letter-spacing: 0.01em;
+    font-weight: 700 !important;
+    padding: 0.85rem 2rem !important;
+    font-size: 1rem !important;
+    letter-spacing: 0.02em;
     transition: all 0.2s !important;
-    box-shadow: 0 2px 12px var(--accent-glow) !important;
-    min-height: 2.75rem;
+    box-shadow: 0 4px 16px var(--accent-glow) !important;
+    min-height: 3.2rem;
+    width: 100%;
 }
 .stButton > button:hover {
-    box-shadow: 0 4px 24px rgba(99, 102, 241, 0.4) !important;
-    transform: translateY(-1px);
+    box-shadow: 0 6px 28px rgba(99, 102, 241, 0.5) !important;
+    transform: translateY(-2px);
 }
 .stButton > button:focus {
     box-shadow: 0 0 0 3px var(--accent-glow) !important;
@@ -512,6 +513,8 @@ footer { visibility: hidden; }
     background: var(--bg-card) !important;
     color: var(--text-primary) !important;
     border: 1px solid var(--border) !important;
+    min-height: 3.2rem;
+    font-size: 1rem;
 }
 [data-testid="stBaseButton-secondary"]:hover {
     border-color: var(--accent) !important;
@@ -1361,7 +1364,7 @@ try:
             label_visibility="collapsed",
         )
 
-        btn_col1, btn_col2, btn_spacer = st.columns([1, 1, 4])
+        btn_col1, btn_col2 = st.columns(2)
         with btn_col1:
             analyze_clicked = st.button(
                 "Analyze Sentiment",
