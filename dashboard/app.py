@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import sys
+import base64
 from PIL import Image
 from pathlib import Path
 import streamlit.components.v1 as components
@@ -182,61 +183,61 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ---------- WIDGET CARD ---------- */
 .widget-card {
-    background: var(--glass);
-    backdrop-filter: var(--blur);
-    -webkit-backdrop-filter: var(--blur);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 2rem;
     padding: 24px;
-    transition: all 0.35s var(--transition);
-    box-shadow: var(--shadow-sm);
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(79, 70, 226, 0.08);
     position: relative;
     overflow: hidden;
 }
 .widget-card:hover {
     transform: translateY(-6px) scale(1.005);
-    box-shadow: var(--shadow-lg);
+    box-shadow: 0 8px 32px rgba(79, 70, 226, 0.16);
     border-color: rgba(255, 255, 255, 0.7);
 }
 .widget-card h3 {
     font-family: 'Cabinet Grotesk', sans-serif;
     font-size: 16px !important;
     font-weight: 700 !important;
-    color: var(--text) !important;
+    color: #1e293b !important;
     margin-bottom: 4px !important;
 }
 .widget-card p {
     font-size: 13px !important;
-    color: var(--text-secondary) !important;
+    color: #64748b !important;
     line-height: 1.6;
 }
 
 /* ---------- GLASS CARD (smaller) ---------- */
 .glass-card {
-    background: var(--glass);
-    backdrop-filter: var(--blur);
-    -webkit-backdrop-filter: var(--blur);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 1.25rem;
     padding: 20px;
-    transition: all 0.35s var(--transition);
-    box-shadow: var(--shadow-sm);
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(79, 70, 226, 0.08);
 }
 .glass-card:hover {
     transform: translateY(-4px) scale(1.003);
-    box-shadow: var(--shadow);
+    box-shadow: 0 4px 16px rgba(79, 70, 226, 0.12);
     border-color: rgba(255, 255, 255, 0.7);
 }
 .glass-card h3 {
     font-family: 'Cabinet Grotesk', sans-serif;
     font-size: 14px !important;
     font-weight: 700 !important;
-    color: var(--text) !important;
+    color: #1e293b !important;
     margin-bottom: 6px !important;
 }
 .glass-card p {
     font-size: 12px !important;
-    color: var(--text-secondary) !important;
+    color: #64748b !important;
     line-height: 1.6;
 }
 
@@ -263,33 +264,6 @@ h1, h2, h3, h4, h5, h6 {
 [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] {
     color: #475569 !important;
 }
-/* Sidebar radio buttons */
-[data-testid="stSidebar"] .stRadio > div { gap: 4px; }
-[data-testid="stSidebar"] .stRadio > div > label {
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: 0.75rem;
-    padding: 8px 12px;
-    font-size: 13px;
-    color: #475569 !important;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-[data-testid="stSidebar"] .stRadio > div > label:hover {
-    background: rgba(79, 70, 226, 0.06);
-    border-color: rgba(79, 70, 226, 0.1);
-}
-[data-testid="stSidebar"] .stRadio > div > label[data-checked="true"] {
-    background: linear-gradient(135deg, rgba(79,70,226,0.12), rgba(124,58,237,0.12)) !important;
-    border-color: #4f46e2 !important;
-}
-[data-testid="stSidebar"] .stRadio > div > label[data-checked="true"] span {
-    color: #4f46e2 !important;
-    font-weight: 600 !important;
-}
-/* Sidebar divider line */
-[data-testid="stSidebar"] hr {
-    border-color: rgba(255, 255, 255, 0.4) !important;
-}
 
 /* Sidebar brand */
 .sidebar-brand {
@@ -301,13 +275,13 @@ h1, h2, h3, h4, h5, h6 {
     font-family: 'Cabinet Grotesk', sans-serif !important;
     font-size: 15px !important;
     font-weight: 800 !important;
-    color: var(--text) !important;
+    color: #1e293b !important;
     margin: 0 !important;
 }
 .sidebar-version {
     display: inline-block;
     background: linear-gradient(135deg, rgba(79,70,226,0.12), rgba(124,58,237,0.12));
-    color: var(--primary);
+    color: #4f46e2;
     padding: 2px 10px;
     border-radius: 20px;
     font-size: 10px;
@@ -319,7 +293,7 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: 600 !important;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: var(--text-muted) !important;
+    color: #94a3b8 !important;
     margin-bottom: 8px !important;
     padding-left: 4px;
 }
@@ -328,10 +302,10 @@ h1, h2, h3, h4, h5, h6 {
     align-items: center;
     gap: 8px;
     padding: 6px 10px;
-    border-radius: var(--radius-xs);
+    border-radius: 0.75rem;
     font-size: 12px;
-    color: var(--text-secondary);
-    transition: background 0.25s var(--transition);
+    color: #64748b;
+    transition: background 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .sidebar-tech-item:hover {
     background: rgba(79, 70, 226, 0.06);
@@ -349,7 +323,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 .sidebar-footer p {
     font-size: 10px !important;
-    color: var(--text-muted) !important;
+    color: #94a3b8 !important;
 }
 
 /* Radio in sidebar */
@@ -357,10 +331,10 @@ h1, h2, h3, h4, h5, h6 {
 [data-testid="stSidebar"] .stRadio > div > label {
     background: transparent;
     border: 1px solid transparent;
-    border-radius: var(--radius-xs);
+    border-radius: 0.75rem;
     padding: 8px 12px;
     font-size: 13px;
-    transition: all 0.25s var(--transition);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 [data-testid="stSidebar"] .stRadio > div > label:hover {
     background: rgba(79, 70, 226, 0.06);
@@ -368,10 +342,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 [data-testid="stSidebar"] .stRadio > div > label[data-checked="true"] {
     background: linear-gradient(135deg, rgba(79,70,226,0.12), rgba(124,58,237,0.12)) !important;
-    border-color: var(--primary) !important;
+    border-color: #4f46e2 !important;
 }
 [data-testid="stSidebar"] .stRadio > div > label[data-checked="true"] span {
-    color: var(--primary) !important;
+    color: #4f46e2 !important;
     font-weight: 600 !important;
 }
 
@@ -424,10 +398,10 @@ h1, h2, h3, h4, h5, h6 {
     from { opacity: 0; transform: scale(0.9); }
     to   { opacity: 1; transform: scale(1); }
 }
-.anim-fade-up { animation: fadeInUp 0.6s var(--transition) both; }
-.anim-fade    { animation: fadeIn 0.5s var(--transition) both; }
-.anim-slide   { animation: slideIn 0.5s var(--transition) both; }
-.anim-scale   { animation: scaleIn 0.5s var(--transition) both; }
+.anim-fade-up { animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) both; }
+.anim-fade    { animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) both; }
+.anim-slide   { animation: slideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) both; }
+.anim-scale   { animation: scaleIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) both; }
 .anim-delay-1 { animation-delay: 0.05s; }
 .anim-delay-2 { animation-delay: 0.10s; }
 .anim-delay-3 { animation-delay: 0.15s; }
@@ -438,16 +412,21 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ---------- HERO CARD ---------- */
 .hero-card {
-    background: var(--glass);
-    backdrop-filter: var(--blur);
-    -webkit-backdrop-filter: var(--blur);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 2rem;
     padding: 40px 36px;
     margin-bottom: 24px;
     position: relative;
     overflow: hidden;
-    transition: all 0.35s var(--transition);
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 16px rgba(79, 70, 226, 0.12);
+}
+.hero-card:hover {
+    transform: translateY(-4px) scale(1.003);
+    box-shadow: 0 8px 32px rgba(79, 70, 226, 0.16);
 }
 .hero-card::before {
     content: '';
@@ -476,22 +455,23 @@ h1, h2, h3, h4, h5, h6 {
     letter-spacing: -0.04em !important;
     line-height: 1.1 !important;
     margin-bottom: 8px !important;
-    background: linear-gradient(135deg, var(--primary), var(--violet));
+    background: linear-gradient(135deg, #4f46e2, #7c3aed);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    color: transparent !important;
 }
 .hero-card .subtitle {
     font-size: 14px;
-    color: var(--text-secondary);
+    color: #64748b;
     font-weight: 400;
     line-height: 1.6;
     max-width: 640px;
 }
 .hero-badge {
     display: inline-block;
-    background: linear-gradient(135deg, rgba(79,70,226,0.12), rgba(124,58,237,0.12));
-    color: var(--primary);
+    background: rgba(79, 70, 226, 0.1);
+    color: #4f46e2;
     padding: 6px 16px;
     border-radius: 20px;
     font-size: 11px;
@@ -505,7 +485,7 @@ h1, h2, h3, h4, h5, h6 {
 /* ---------- GLASS HERO PROMO CARD ---------- */
 .hero-promo {
     background: linear-gradient(135deg, #4f46e2, #5b52e8, #7c3aed);
-    border-radius: var(--radius);
+    border-radius: 2rem;
     padding: 40px 32px;
     color: white;
     position: relative;
@@ -547,7 +527,7 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 28px;
     margin-bottom: 20px;
     cursor: pointer;
-    transition: all 0.3s var(--transition);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .hero-promo .hero-play:hover {
     background: rgba(255,255,255,0.3);
@@ -556,18 +536,18 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ---------- METRIC CARD ---------- */
 .metric-card {
-    background: var(--glass);
-    backdrop-filter: var(--blur);
-    -webkit-backdrop-filter: var(--blur);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 1.25rem;
     padding: 20px;
-    transition: all 0.35s var(--transition);
-    box-shadow: var(--shadow-sm);
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(79, 70, 226, 0.08);
 }
 .metric-card:hover {
     transform: translateY(-4px) scale(1.003);
-    box-shadow: var(--shadow);
+    box-shadow: 0 4px 16px rgba(79, 70, 226, 0.12);
 }
 .metric-value {
     font-family: 'Cabinet Grotesk', sans-serif;
@@ -576,11 +556,11 @@ h1, h2, h3, h4, h5, h6 {
     letter-spacing: -0.04em;
     line-height: 1;
     margin-bottom: 4px;
-    color: var(--text);
+    color: #1e293b;
 }
 .metric-label {
     font-size: 11px;
-    color: var(--text-muted);
+    color: #94a3b8;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -610,18 +590,18 @@ h1, h2, h3, h4, h5, h6 {
     font-family: 'Cabinet Grotesk', sans-serif;
     font-size: 13px;
     font-weight: 600;
-    color: var(--text);
+    color: #1e293b;
     margin-bottom: 2px;
 }
 .project-sub {
     font-size: 11px;
-    color: var(--text-muted);
+    color: #94a3b8;
 }
 .project-pct {
     font-family: 'Cabinet Grotesk', sans-serif;
     font-size: 13px;
     font-weight: 700;
-    color: var(--text);
+    color: #1e293b;
 }
 .project-bar {
     height: 6px;
@@ -633,8 +613,8 @@ h1, h2, h3, h4, h5, h6 {
 .project-bar-fill {
     height: 100%;
     border-radius: 10px;
-    animation: progressFill 1s var(--transition) both;
-    box-shadow: 0 0 8px var(--bar-glow, rgba(79, 70, 226, 0.3));
+    animation: progressFill 1s cubic-bezier(0.4, 0, 0.2, 1) both;
+    box-shadow: 0 0 8px rgba(79, 70, 226, 0.3);
 }
 
 /* ---------- PROBABILITY BAR ---------- */
@@ -655,7 +635,7 @@ h1, h2, h3, h4, h5, h6 {
 .prob-bar-fill {
     height: 100%;
     border-radius: 10px;
-    animation: progressFill 0.8s var(--transition) both;
+    animation: progressFill 0.8s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 /* ---------- RESULT BADGE ---------- */
@@ -687,20 +667,20 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ---------- HIGHLIGHT CARD ---------- */
 .highlight-card {
-    background: var(--glass);
-    backdrop-filter: var(--blur);
-    -webkit-backdrop-filter: var(--blur);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 1rem;
     padding: 14px 16px;
     display: flex;
     align-items: center;
     gap: 12px;
-    transition: all 0.35s var(--transition);
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .highlight-card:hover {
     transform: translateY(-3px);
-    box-shadow: var(--shadow);
+    box-shadow: 0 4px 16px rgba(79, 70, 226, 0.12);
     border-color: rgba(255, 255, 255, 0.7);
 }
 .highlight-icon {
@@ -716,7 +696,7 @@ h1, h2, h3, h4, h5, h6 {
 .highlight-text {
     font-size: 12px;
     font-weight: 600;
-    color: var(--text);
+    color: #1e293b;
     line-height: 1.3;
 }
 
@@ -726,7 +706,7 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    color: var(--text-muted);
+    color: #94a3b8;
     margin-bottom: 14px;
     font-weight: 700;
 }
@@ -734,7 +714,7 @@ h1, h2, h3, h4, h5, h6 {
 /* ---------- DIVIDER ---------- */
 .premium-divider {
     border: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.5);
+    border-top: 1px solid #e2e8f0;
     margin: 24px 0;
 }
 
@@ -822,22 +802,22 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ---------- DATAFRAME ---------- */
 .stDataFrame {
-    border-radius: var(--radius-sm) !important;
+    border-radius: 1rem !important;
     overflow: hidden;
-    border: 1px solid var(--glass-border) !important;
-    background: var(--glass) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    background: rgba(255, 255, 255, 0.72) !important;
 }
 
 /* ---------- SPINNER ---------- */
 .stSpinner > div {
-    border-color: var(--primary) transparent transparent transparent !important;
+    border-color: #4f46e2 transparent transparent transparent !important;
 }
 
 /* ---------- ALERTS ---------- */
 .stAlert {
-    border-radius: var(--radius-sm) !important;
+    border-radius: 1rem !important;
     border-left-width: 3px !important;
-    background: var(--glass) !important;
+    background: rgba(255, 255, 255, 0.72) !important;
     backdrop-filter: blur(12px) !important;
 }
 
@@ -846,19 +826,19 @@ h1, h2, h3, h4, h5, h6 {
     gap: 4px;
     background: rgba(255, 255, 255, 0.6);
     backdrop-filter: blur(12px);
-    border-radius: var(--radius-sm);
+    border-radius: 1rem;
     padding: 4px;
-    border: 1px solid var(--glass-border);
+    border: 1px solid rgba(255, 255, 255, 0.5);
 }
 .stTabs [data-baseweb="tab"] {
-    border-radius: var(--radius-xs) !important;
+    border-radius: 0.75rem !important;
     font-weight: 500;
     font-size: 13px;
     font-family: 'Cabinet Grotesk', sans-serif;
 }
 .stTabs [aria-selected="true"] {
     background: white !important;
-    box-shadow: var(--shadow-sm) !important;
+    box-shadow: 0 2px 8px rgba(79, 70, 226, 0.08) !important;
 }
 
 /* ---------- SELECTBOX / MULTISELECT ---------- */
@@ -913,40 +893,13 @@ h1, h2, h3, h4, h5, h6 {
     color: #1e293b !important;
 }
 
-/* ---------- SPINNER ---------- */
-.stSpinner > div {
-    border-color: #4f46e2 transparent transparent transparent !important;
-}
-
-/* ---------- TABS ---------- */
-.stTabs [data-baseweb="tab-list"] {
-    gap: 4px;
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(12px);
-    border-radius: var(--radius-sm);
-    padding: 4px;
-    border: 1px solid var(--glass-border);
-}
-.stTabs [data-baseweb="tab"] {
-    border-radius: var(--radius-xs) !important;
-    font-weight: 500;
-    font-size: 13px;
-    font-family: 'Cabinet Grotesk', sans-serif;
-    color: #64748b !important;
-}
-.stTabs [aria-selected="true"] {
-    background: white !important;
-    color: #4f46e2 !important;
-    box-shadow: var(--shadow-sm) !important;
-}
-
 /* ---------- EXPANDER ---------- */
 [data-testid="stExpander"] {
     background: rgba(255, 255, 255, 0.72) !important;
     backdrop-filter: blur(28px) !important;
     -webkit-backdrop-filter: blur(28px) !important;
     border: 1px solid rgba(255, 255, 255, 0.5) !important;
-    border-radius: var(--radius-md) !important;
+    border-radius: 1.25rem !important;
 }
 [data-testid="stExpander"] summary {
     font-weight: 600 !important;
@@ -960,9 +913,9 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ---------- DATAFRAME ---------- */
 .stDataFrame, [data-testid="stDataFrame"] {
-    border-radius: var(--radius-sm) !important;
+    border-radius: 1rem !important;
     overflow: hidden;
-    border: 1px solid var(--glass-border) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
     background: rgba(255, 255, 255, 0.72) !important;
 }
 
@@ -988,45 +941,45 @@ a[href] { color: #4f46e2 !important; }
     font-weight: 800 !important;
     letter-spacing: -0.03em !important;
     margin-bottom: 4px !important;
-    color: var(--text) !important;
+    color: #1e293b !important;
 }
 .page-heading p {
     font-size: 14px;
-    color: var(--text-secondary);
+    color: #64748b;
 }
 
 /* ---------- TIP CARD ---------- */
 .tip-card {
     background: linear-gradient(135deg, rgba(79,70,226,0.06), rgba(124,58,237,0.06));
     border: 1px solid rgba(79, 70, 226, 0.12);
-    border-radius: var(--radius-sm);
+    border-radius: 1rem;
     padding: 14px 18px;
     font-size: 13px;
-    color: var(--text-secondary);
+    color: #64748b;
     line-height: 1.6;
 }
-.tip-card strong { color: var(--primary); }
+.tip-card strong { color: #4f46e2; }
 
 /* ---------- EXAMPLE BUTTON ---------- */
 .example-btn {
     display: flex;
     align-items: center;
     gap: 10px;
-    background: var(--glass);
+    background: rgba(255, 255, 255, 0.72);
     backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-sm);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 1rem;
     padding: 12px 14px;
     cursor: pointer;
-    transition: all 0.35s var(--transition);
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     width: 100%;
     text-align: left;
 }
 .example-btn:hover {
-    border-color: var(--primary);
-    background: var(--glass-hover);
+    border-color: #4f46e2;
+    background: rgba(255, 255, 255, 0.85);
     transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 2px 8px rgba(79, 70, 226, 0.08);
 }
 .example-emoji {
     font-size: 20px;
@@ -1038,12 +991,12 @@ a[href] { color: #4f46e2 !important; }
     font-family: 'Cabinet Grotesk', sans-serif;
     font-size: 12px;
     font-weight: 600;
-    color: var(--text);
+    color: #1e293b;
     margin: 0 0 2px 0;
 }
 .example-content p {
     font-size: 11px;
-    color: var(--text-muted);
+    color: #94a3b8;
     margin: 0;
     line-height: 1.4;
     overflow: hidden;
@@ -1057,29 +1010,29 @@ a[href] { color: #4f46e2 !important; }
     align-items: center;
     gap: 10px;
     padding: 8px 14px;
-    border-radius: var(--radius-xs);
+    border-radius: 0.75rem;
     font-size: 12px;
-    color: var(--text-secondary);
+    color: #64748b;
     transition: all 0.3s;
 }
 .loading-stage.active {
     background: rgba(79, 70, 226, 0.08);
-    color: var(--primary);
+    color: #4f46e2;
     font-weight: 500;
 }
-.loading-stage.done { color: var(--primary); }
+.loading-stage.done { color: #4f46e2; }
 .loading-dot {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: var(--text-muted);
+    background: #94a3b8;
     flex-shrink: 0;
 }
 .loading-stage.active .loading-dot {
-    background: var(--primary);
+    background: #4f46e2;
     animation: pulse 1s infinite;
 }
-.loading-stage.done .loading-dot { background: var(--primary); }
+.loading-stage.done .loading-dot { background: #4f46e2; }
 @keyframes pulse {
     0%, 100% { opacity: 1; transform: scale(1); }
     50% { opacity: 0.5; transform: scale(1.4); }
@@ -1100,11 +1053,11 @@ a[href] { color: #4f46e2 !important; }
     font-size: 18px;
     font-weight: 700;
     margin-bottom: 8px;
-    color: var(--text);
+    color: #1e293b;
 }
 .empty-state p {
     font-size: 13px;
-    color: var(--text-muted);
+    color: #94a3b8;
     max-width: 360px;
     margin: 0 auto;
 }
@@ -1113,24 +1066,24 @@ a[href] { color: #4f46e2 !important; }
 .app-footer {
     margin-top: 32px;
     padding: 24px 0 16px 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.5);
+    border-top: 1px solid #e2e8f0;
     text-align: center;
 }
 .app-footer-brand {
     font-family: 'Cabinet Grotesk', sans-serif;
     font-size: 15px;
     font-weight: 800;
-    color: var(--text);
+    color: #1e293b;
     margin-bottom: 4px;
 }
 .app-footer-sub {
     font-size: 12px;
-    color: var(--text-muted);
+    color: #94a3b8;
     margin-bottom: 10px;
 }
 .app-footer-author {
     font-size: 11px;
-    color: var(--text-muted);
+    color: #94a3b8;
     margin-bottom: 12px;
 }
 .app-footer-tech {
@@ -1142,36 +1095,36 @@ a[href] { color: #4f46e2 !important; }
 }
 .app-footer-pill {
     display: inline-block;
-    background: var(--glass);
+    background: rgba(255, 255, 255, 0.72);
     backdrop-filter: blur(8px);
-    border: 1px solid var(--glass-border);
+    border: 1px solid rgba(255, 255, 255, 0.5);
     border-radius: 20px;
     padding: 4px 12px;
     font-size: 10px;
     font-weight: 500;
-    color: var(--text-secondary);
+    color: #64748b;
 }
 .app-footer-copy {
     font-size: 10px;
-    color: var(--text-muted);
+    color: #94a3b8;
     opacity: 0.6;
 }
 
 /* ---------- ABOUT PAGE ---------- */
 .about-section-card {
-    background: var(--glass);
-    backdrop-filter: var(--blur);
-    -webkit-backdrop-filter: var(--blur);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 1.25rem;
     padding: 22px;
     margin-bottom: 12px;
-    box-shadow: var(--shadow-sm);
-    transition: all 0.35s var(--transition);
+    box-shadow: 0 2px 8px rgba(79, 70, 226, 0.08);
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .about-section-card:hover {
     transform: translateY(-3px);
-    box-shadow: var(--shadow);
+    box-shadow: 0 4px 16px rgba(79, 70, 226, 0.12);
 }
 .about-section-header {
     display: flex;
@@ -1194,14 +1147,14 @@ a[href] { color: #4f46e2 !important; }
     font-size: 15px;
     font-weight: 700;
     letter-spacing: -0.01em;
-    color: var(--text);
+    color: #1e293b;
 }
 .about-section-body {
     font-size: 13px;
-    color: var(--text-secondary);
+    color: #64748b;
     line-height: 1.7;
 }
-.about-section-body strong { color: var(--text); }
+.about-section-body strong { color: #1e293b; }
 
 /* ---------- PROGRESS BAR ---------- */
 .progress-track {
@@ -1215,7 +1168,7 @@ a[href] { color: #4f46e2 !important; }
     height: 100%;
     background: linear-gradient(90deg, #4f46e2, #7c3aed);
     border-radius: 10px;
-    animation: progressFill 0.8s var(--transition) both;
+    animation: progressFill 0.8s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 /* ---------- SEARCH BAR (Header) ---------- */
@@ -1225,20 +1178,20 @@ a[href] { color: #4f46e2 !important; }
     gap: 10px;
     background: rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border);
+    border: 1px solid rgba(255, 255, 255, 0.5);
     border-radius: 16px;
     padding: 10px 16px;
     width: 100%;
     max-width: 320px;
-    transition: all 0.3s var(--transition);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .header-search:focus-within {
-    border-color: var(--primary);
+    border-color: #4f46e2;
     box-shadow: 0 0 0 3px rgba(79, 70, 226, 0.1);
 }
 .header-search-icon {
     font-size: 14px;
-    color: var(--text-muted);
+    color: #94a3b8;
     flex-shrink: 0;
 }
 .header-search input {
@@ -1247,31 +1200,31 @@ a[href] { color: #4f46e2 !important; }
     outline: none;
     font-family: 'Satoshi', sans-serif;
     font-size: 13px;
-    color: var(--text);
+    color: #1e293b;
     width: 100%;
 }
-.header-search input::placeholder { color: var(--text-muted); }
+.header-search input::placeholder { color: #94a3b8; }
 
 /* ---------- NOTIFICATION BTN ---------- */
 .notif-btn {
     width: 48px;
     height: 48px;
     border-radius: 16px;
-    background: var(--glass);
+    background: rgba(255, 255, 255, 0.72);
     backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border);
+    border: 1px solid rgba(255, 255, 255, 0.5);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 18px;
     cursor: pointer;
-    transition: all 0.3s var(--transition);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     flex-shrink: 0;
 }
 .notif-btn:hover {
-    background: var(--glass-hover);
+    background: rgba(255, 255, 255, 0.85);
     transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 2px 8px rgba(79, 70, 226, 0.08);
 }
 
 /* ---------- SVG CHART AREA ---------- */
@@ -1346,7 +1299,7 @@ def render_prob_bar(label: str, value: float, color: str) -> str:
     <div class="prob-bar-container">
         <div class="prob-bar-label">
             <span style="color: {color}; font-weight: 600;">{label}</span>
-            <span style="color: var(--text-muted);">{pct:.1f}%</span>
+            <span style="color: #94a3b8;">{pct:.1f}%</span>
         </div>
         <div class="prob-bar-track">
             <div class="prob-bar-fill" style="width: {pct}%; background: {color};"></div>
@@ -1381,7 +1334,7 @@ def render_footer():
     <div class="app-footer">
         <div class="app-footer-brand">StartupPulse AI</div>
         <div class="app-footer-sub">Explainable Aspect-Based Sentiment Analysis</div>
-        <div class="app-footer-author">Built by <strong style="color: var(--text);">Nikhil Khetavath</strong></div>
+        <div class="app-footer-author">Built by <strong style="color: #1e293b;">Nikhil Khetavath</strong></div>
         <div class="app-footer-tech">
             <span class="app-footer-pill">DeBERTa-v3</span>
             <span class="app-footer-pill">Hugging Face</span>
@@ -1416,7 +1369,7 @@ def render_loading_html(completed_count: int, active_idx: int, progress_pct: int
     return f"""
     <div class="glass-card" style="margin-top: 1rem;">
         <p style="font-family: 'Cabinet Grotesk', sans-serif; font-size: 0.75rem; text-transform: uppercase;
-                  letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 0.8rem; font-weight: 700;">
+                  letter-spacing: 0.1em; color: #94a3b8; margin-bottom: 0.8rem; font-weight: 700;">
             Processing Pipeline
         </p>
         {stages_html}
@@ -1496,11 +1449,11 @@ def render_horizontal_bar(label: str, pct: float, color: str = "#4f46e2") -> str
     return f"""
     <div style="margin-bottom: 10px;">
         <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
-            <span style="font-size:12px;font-weight:500;color:var(--text);">{label}</span>
+            <span style="font-size:12px;font-weight:500;color:#1e293b;">{label}</span>
             <span style="font-size:12px;font-weight:600;color:{color};">{pct:.0f}%</span>
         </div>
         <div style="height:10px;background:rgba(79,70,226,0.06);border-radius:10px;overflow:hidden;">
-            <div style="height:100%;width:{pct}%;background:{color};border-radius:10px;animation:progressFill 1s var(--transition) both;
+            <div style="height:100%;width:{pct}%;background:{color};border-radius:10px;animation:progressFill 1s cubic-bezier(0.4, 0, 0.2, 1) both;
                         box-shadow:0 0 8px {color}40;"></div>
         </div>
     </div>
@@ -1527,7 +1480,7 @@ with st.sidebar:
             f"""
         <div class="sidebar-logo-wrap">
             <div class="sidebar-logo-box">
-                <img src="data:image/png;base64,{__import__('base64').b64encode(open(str(logo_path), 'rb').read()).decode()}" alt="Logo">
+                <img src="data:image/png;base64,{base64.b64encode(open(str(logo_path), 'rb').read()).decode()}" alt="Logo">
             </div>
         </div>
         """,
@@ -1538,7 +1491,7 @@ with st.sidebar:
         f"""
     <div class="sidebar-brand">
         <h2>StartupPulse AI</h2>
-        <p style="text-align: center; font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 400;">Explainable AI Dashboard</p>
+        <p style="text-align: center; font-size: 0.78rem; color: #94a3b8; margin-bottom: 0.5rem; font-weight: 400;">Explainable AI Dashboard</p>
         <div style="text-align: center;">
             <span class="sidebar-version">{APP_VERSION}</span>
         </div>
@@ -1695,7 +1648,7 @@ try:
                 <div style="display:flex;justify-content:center;margin:16px 0;">
                     {render_circular_gauge(round(accuracy_val * 100, 1))}
                 </div>
-                <p style="text-align:center;font-size:12px;color:var(--text-muted);margin-top:8px;">DeBERTa-v3 Fine-tuned</p>
+                <p style="text-align:center;font-size:12px;color:#94a3b8;margin-top:8px;">DeBERTa-v3 Fine-tuned</p>
             </div>
             """,
                 unsafe_allow_html=True,
@@ -1761,7 +1714,7 @@ try:
             st.markdown(
                 f"""
             <div class="metric-card anim-fade-up anim-delay-1">
-                <div class="metric-value" style="color:var(--primary);">{stats['total']:,}</div>
+                <div class="metric-value" style="color:#4f46e2;">{stats['total']:,}</div>
                 <div class="metric-label">Total Reviews</div>
             </div>
             """,
@@ -1820,7 +1773,7 @@ try:
         st.markdown('<p class="section-label">Model Performance</p>', unsafe_allow_html=True)
         if metrics_df is not None:
             metric_defs = [
-                ("Accuracy", "var(--primary)"),
+                ("Accuracy", "#4f46e2"),
                 ("Precision", "#7c3aed"),
                 ("Recall", "#f43f5e"),
                 ("F1 Score", "#10b981"),
@@ -1865,7 +1818,7 @@ try:
                         the final sentiment classification.
                     </p>
                     <p style="margin-top: 1rem; font-size: 13px;">
-                        <strong style="color: var(--primary);">Navigate to Analyze Review</strong>
+                        <strong style="color: #4f46e2;">Navigate to Analyze Review</strong>
                         to try it with your own employee feedback.
                     </p>
                 </div>
@@ -2007,7 +1960,7 @@ try:
                             {render_sentiment_badge(label)}
                         </div>
                         <div style="margin-bottom: 0.3rem;">
-                            <span style="font-size: 11px; color: var(--text-muted); font-weight: 500;
+                            <span style="font-size: 11px; color: #94a3b8; font-weight: 500;
                                          text-transform: uppercase; letter-spacing: 0.06em;">
                                 Confidence
                             </span>
@@ -2016,11 +1969,11 @@ try:
                                     color: {accent_color}; line-height: 1;">
                             {confidence:.1%}
                         </div>
-                        <div style="margin-top: 1.2rem; padding-top: 1rem; border-top: 1px solid var(--glass-border);">
-                            <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 0.3rem;">
+                        <div style="margin-top: 1.2rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.5);">
+                            <p style="font-size: 11px; color: #94a3b8; margin-bottom: 0.3rem;">
                                 Source Text
                             </p>
-                            <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;
+                            <p style="font-size: 13px; color: #64748b; line-height: 1.5;
                                       max-height: 80px; overflow-y: auto;">
                                 {sanitize_html(st.session_state['review_text'][:200])}{'...' if len(st.session_state['review_text']) > 200 else ''}
                             </p>
@@ -2030,9 +1983,9 @@ try:
                     <div class="glass-card">
                         <p class="section-label">Class Probability Distribution</p>
                         {prob_bars_html}
-                        <div style="margin-top: 1.2rem; padding-top: 1rem; border-top: 1px solid var(--glass-border);">
-                            <p style="font-size: 13px; color: var(--text-secondary);">
-                                Navigate to <strong style="color: var(--primary);">Explainability</strong>
+                        <div style="margin-top: 1.2rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.5);">
+                            <p style="font-size: 13px; color: #64748b;">
+                                Navigate to <strong style="color: #4f46e2;">Explainability</strong>
                                 to view SHAP token-level explanations for this prediction.
                             </p>
                         </div>
@@ -2078,13 +2031,13 @@ try:
                 f"""
             <div class="glass-card anim-fade-up" style="margin-bottom: 1.5rem;">
                 <p class="section-label">Analyzed Text</p>
-                <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.6;">
+                <p style="font-size: 14px; color: #64748b; line-height: 1.6;">
                     {sanitize_html(st.session_state['review_text'])}
                 </p>
                 <div style="margin-top: 0.8rem;">
                     {render_sentiment_badge(res['label'])}
-                    <span style="margin-left: 10px; font-size: 13px; color: var(--text-secondary);">
-                        Confidence: <strong style="color: var(--text);">{res['confidence']:.1%}</strong>
+                    <span style="margin-left: 10px; font-size: 13px; color: #64748b;">
+                        Confidence: <strong style="color: #1e293b;">{res['confidence']:.1%}</strong>
                     </span>
                 </div>
             </div>
@@ -2181,7 +2134,7 @@ try:
             st.markdown(
                 f"""
             <div class="metric-card anim-fade-up anim-delay-1">
-                <div class="metric-value" style="color:var(--primary);">{stats['total']:,}</div>
+                <div class="metric-value" style="color:#4f46e2;">{stats['total']:,}</div>
                 <div class="metric-label">Total Reviews</div>
             </div>
             """,
@@ -2256,7 +2209,7 @@ try:
             <div class="metric-card" style="margin-top: 0.8rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <span class="metric-label" style="text-transform: none; letter-spacing: 0;">Avg. Words per Review</span>
-                    <span class="metric-value" style="font-size: 1.6rem; color: var(--text);">{stats['avg_length']:.1f}</span>
+                    <span class="metric-value" style="font-size: 1.6rem; color: #1e293b;">{stats['avg_length']:.1f}</span>
                 </div>
             </div>
             """,
@@ -2480,23 +2433,23 @@ try:
         <div class="glass-card">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                 <div>
-                    <p style="font-size: 13px; color: var(--text-muted);">
-                        <strong style="color: var(--text);">Author:</strong> Nikhil Khetavath &nbsp;&middot;&nbsp;
-                        <strong style="color: var(--text);">License:</strong> MIT &nbsp;&middot;&nbsp;
-                        <strong style="color: var(--text);">Version:</strong> {APP_VERSION}
+                    <p style="font-size: 13px; color: #94a3b8;">
+                        <strong style="color: #1e293b;">Author:</strong> Nikhil Khetavath &nbsp;&middot;&nbsp;
+                        <strong style="color: #1e293b;">License:</strong> MIT &nbsp;&middot;&nbsp;
+                        <strong style="color: #1e293b;">Version:</strong> {APP_VERSION}
                     </p>
                 </div>
                 <div style="display: flex; gap: 8px;">
                     <a href="https://github.com/khetavathnikhil17-afk/StartupPulse-AI" target="_blank" style="
-                        display: inline-block; background: var(--glass); backdrop-filter: blur(8px); border: 1px solid var(--glass-border);
-                        border-radius: 12px; padding: 8px 16px; color: var(--text);
-                        text-decoration: none; font-size: 13px; font-weight: 500; transition: all 0.3s var(--transition);">
+                        display: inline-block; background: rgba(255, 255, 255, 0.72); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.5);
+                        border-radius: 12px; padding: 8px 16px; color: #1e293b;
+                        text-decoration: none; font-size: 13px; font-weight: 500; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
                         GitHub Repository
                     </a>
                     <a href="https://www.linkedin.com/in/nikhilkhetavath-ai" target="_blank" style="
-                        display: inline-block; background: var(--glass); backdrop-filter: blur(8px); border: 1px solid var(--glass-border);
-                        border-radius: 12px; padding: 8px 16px; color: var(--text);
-                        text-decoration: none; font-size: 13px; font-weight: 500; transition: all 0.3s var(--transition);">
+                        display: inline-block; background: rgba(255, 255, 255, 0.72); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.5);
+                        border-radius: 12px; padding: 8px 16px; color: #1e293b;
+                        text-decoration: none; font-size: 13px; font-weight: 500; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
                         LinkedIn Profile
                     </a>
                 </div>
