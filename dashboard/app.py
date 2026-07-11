@@ -484,7 +484,6 @@ footer { visibility: hidden; }
 [data-testid="stExpander"] summary { font-weight: 600 !important; }
 
 /* ---------- BUTTONS ---------- */
-.stButton > button[kind="primary"],
 .stButton > button {
     background: linear-gradient(135deg, var(--accent) 0%, #7c3aed 100%) !important;
     color: white !important;
@@ -496,10 +495,27 @@ footer { visibility: hidden; }
     letter-spacing: 0.01em;
     transition: all 0.2s !important;
     box-shadow: 0 2px 12px var(--accent-glow) !important;
+    min-height: 2.75rem;
 }
 .stButton > button:hover {
     box-shadow: 0 4px 24px rgba(99, 102, 241, 0.4) !important;
     transform: translateY(-1px);
+}
+.stButton > button:focus {
+    box-shadow: 0 0 0 3px var(--accent-glow) !important;
+    outline: none !important;
+}
+.stButton > button:active {
+    transform: translateY(0) !important;
+}
+[data-testid="stBaseButton-secondary"] {
+    background: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border) !important;
+}
+[data-testid="stBaseButton-secondary"]:hover {
+    border-color: var(--accent) !important;
+    background: var(--bg-card-hover) !important;
 }
 .stDownloadButton > button {
     background: var(--bg-card) !important;
@@ -1347,7 +1363,11 @@ try:
 
         btn_col1, btn_col2, btn_spacer = st.columns([1, 1, 4])
         with btn_col1:
-            analyze_clicked = st.button("Analyze Sentiment", use_container_width=True)
+            analyze_clicked = st.button(
+                "Analyze Sentiment",
+                use_container_width=True,
+                type="primary",
+            )
         with btn_col2:
             if st.button("Clear", use_container_width=True):
                 st.session_state["review_text"] = ""
@@ -1362,22 +1382,25 @@ try:
                 st.session_state["review_text"] = review_input
 
                 loading_container = st.empty()
-                loading_container.markdown(render_loading_html(0, 0, 0), unsafe_allow_html=True)
+                loading_container.markdown(render_loading_html(0, 0, 10), unsafe_allow_html=True)
 
                 try:
+                    loading_container.markdown(render_loading_html(1, 1, 25), unsafe_allow_html=True)
+                    _load_ml_libs()
+
                     from src.explainability.shap_explainer import explain_prediction
 
-                    loading_container.markdown(render_loading_html(1, 1, 30), unsafe_allow_html=True)
+                    loading_container.markdown(render_loading_html(2, 2, 50), unsafe_allow_html=True)
                     result = explain_prediction(review_input)
                     st.session_state["prediction_result"] = result
 
                     loading_container.markdown(render_loading_html(5, 5, 100), unsafe_allow_html=True)
-                    loading_container.empty()
 
                 except Exception as e:
-                    loading_container.empty()
                     st.error(f"Analysis failed: {e}")
                     logger.error(f"Dashboard analysis error: {e}")
+
+                loading_container.empty()
 
         # ---- Result card ----
         if st.session_state["prediction_result"]:
