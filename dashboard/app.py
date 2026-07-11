@@ -106,8 +106,12 @@ st.markdown(
 section.main > div { padding: 2rem 2.5rem 4rem 2.5rem; }
 
 /* ---------- HIDE DEFAULT STREAMLIT ELEMENTS ---------- */
-#MainMenu, footer, header { visibility: hidden; }
+#MainMenu, footer { visibility: hidden; }
 [data-testid="stDecoration"] { display: none; }
+header[data-testid="stHeader"] { visibility: visible !important; }
+header[data-testid="stHeader"] > div { visibility: hidden; }
+header[data-testid="stHeader"] button[title="Close sidebar"] { visibility: visible !important; }
+header[data-testid="stHeader"] button[title="Open sidebar"] { visibility: visible !important; }
 
 /* ---------- STREAMLIT DARK THEME OVERRIDES ---------- */
 [data-testid="stSelectbox"] div div div,
@@ -146,6 +150,8 @@ section.main > div { padding: 2rem 2.5rem 4rem 2.5rem; }
     background: linear-gradient(180deg, #0f0f12 0%, #131316 100%) !important;
     border-right: 1px solid var(--border-subtle) !important;
     padding: 1.5rem 1rem;
+    width: 280px;
+    min-width: 280px;
 }
 [data-testid="stSidebar"] [data-testid="stImageContainer"] {
     display: flex;
