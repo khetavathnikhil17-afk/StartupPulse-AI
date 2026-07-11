@@ -31,10 +31,10 @@
   <img src="https://img.shields.io/badge/Status-Production%20Ready-22c55e?style=for-the-badge" alt="Production Ready">
   <img src="https://img.shields.io/badge/Explainable-AI-8b5cf6?style=for-the-badge" alt="Explainable AI">
   <img src="https://img.shields.io/badge/Version-1.3.0-6366F1?style=for-the-badge" alt="Version">
-  <img src="https://img.shields.io/github/stars/NikhilKhetavath/StartupPulse-AI?style=for-the-badge&color=facc15" alt="GitHub Stars">
-  <img src="https://img.shields.io/github/forks/NikhilKhetavath/StartupPulse-AI?style=for-the-badge&color=3b82f6" alt="GitHub Forks">
-  <img src="https://img.shields.io/github/last-commit/NikhilKhetavath/StartupPulse-AI?style=for-the-badge" alt="Last Commit">
-  <img src="https://img.shields.io/github/repo-size/NikhilKhetavath/StartupPulse-AI?style=for-the-badge" alt="Repo Size">
+  <img src="https://img.shields.io/github/stars/khetavathnikhil17-afk/StartupPulse-AI?style=for-the-badge&color=facc15" alt="GitHub Stars">
+  <img src="https://img.shields.io/github/forks/khetavathnikhil17-afk/StartupPulse-AI?style=for-the-badge&color=3b82f6" alt="GitHub Forks">
+  <img src="https://img.shields.io/github/last-commit/khetavathnikhil17-afk/StartupPulse-AI?style=for-the-badge" alt="Last Commit">
+  <img src="https://img.shields.io/github/repo-size/khetavathnikhil17-afk/StartupPulse-AI?style=for-the-badge" alt="Repo Size">
 </p>
 
 <br>
@@ -231,7 +231,6 @@ StartupPulse-AI/
 |   +-- shap/                       # SHAP output files
 |
 |-- logs/                           # Application and training logs
-|-- test_backend.py                 # Integration test suite
 |-- requirements.txt
 |-- pyproject.toml
 +-- LICENSE
@@ -313,7 +312,7 @@ python -m src.model.evaluate
 python -c "from src.model.predict import predict_sentiment; print(predict_sentiment('Great workplace'))"
 
 # Run tests
-python test_backend.py
+python -m pytest tests/ -v
 ```
 
 ---
