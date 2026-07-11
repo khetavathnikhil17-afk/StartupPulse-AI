@@ -1,3 +1,5 @@
+"""Inference wrapper for sentiment prediction."""
+
 from src.model.predict import predict_sentiment
 
 def get_prediction(text: str):

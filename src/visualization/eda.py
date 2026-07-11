@@ -1,3 +1,5 @@
+"""Exploratory Data Analysis report generator."""
+
 import pandas as pd
 from src.config.config import RAW_DATA_PATH
 from src.utils.logger import get_logger

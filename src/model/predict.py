@@ -95,6 +95,4 @@ def predict_sentiment(text: str) -> dict:
     return _predictor.predict(text)
 
 
-if __name__ == "__main__":
-    sample_text = "This startup is a fantastic place to grow!"
-    print(predict_sentiment(sample_text))
+

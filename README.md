@@ -252,7 +252,7 @@ StartupPulse-AI/
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/NikhilKhetavath/StartupPulse-AI.git
+git clone https://github.com/khetavathnikhil17-afk/StartupPulse-AI.git
 cd StartupPulse-AI
 
 # 2. Create a virtual environment
@@ -508,7 +508,7 @@ Please ensure your code follows the existing style and includes appropriate test
 **Nikhil Khetavath**
 
 - [GitHub](https://github.com/khetavathnikhil17-afk)
-- [LinkedIn](https://www.linkedin.com/in/nikhilkhetavath-ai?utm_source=share_via&utm_content=profile&utm_medium=member_android)
+- [LinkedIn](https://www.linkedin.com/in/nikhilkhetavath-ai)
 
 ---
 
