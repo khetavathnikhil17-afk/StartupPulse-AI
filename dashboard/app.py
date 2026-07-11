@@ -1171,60 +1171,52 @@ a[href] { color: #4f46e2 !important; }
     animation: progressFill 0.8s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
-/* ---------- SEARCH BAR (Header) ---------- */
-.header-search {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    border-radius: 16px;
-    padding: 10px 16px;
-    width: 100%;
-    max-width: 320px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* ---------- FOOTER ---------- */
+.app-footer {
+    margin-top: 32px;
+    padding: 24px 0 16px 0;
+    border-top: 1px solid #e2e8f0;
+    text-align: center;
 }
-.header-search:focus-within {
-    border-color: #4f46e2;
-    box-shadow: 0 0 0 3px rgba(79, 70, 226, 0.1);
-}
-.header-search-icon {
-    font-size: 14px;
-    color: #94a3b8;
-    flex-shrink: 0;
-}
-.header-search input {
-    border: none;
-    background: transparent;
-    outline: none;
-    font-family: 'Satoshi', sans-serif;
-    font-size: 13px;
+.app-footer-brand {
+    font-family: 'Cabinet Grotesk', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
     color: #1e293b;
-    width: 100%;
+    margin-bottom: 4px;
 }
-.header-search input::placeholder { color: #94a3b8; }
-
-/* ---------- NOTIFICATION BTN ---------- */
-.notif-btn {
-    width: 48px;
-    height: 48px;
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.72);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
+.app-footer-sub {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-bottom: 10px;
+}
+.app-footer-author {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-bottom: 12px;
+}
+.app-footer-tech {
     display: flex;
-    align-items: center;
     justify-content: center;
-    font-size: 18px;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    flex-shrink: 0;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
 }
-.notif-btn:hover {
-    background: rgba(255, 255, 255, 0.85);
-    transform: translateY(-2px);
-    box-shadow: 0 2px 8px rgba(79, 70, 226, 0.08);
+.app-footer-pill {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 10px;
+    font-weight: 500;
+    color: #64748b;
+}
+.app-footer-copy {
+    font-size: 10px;
+    color: #94a3b8;
+    opacity: 0.6;
 }
 
 /* ---------- SVG CHART AREA ---------- */
@@ -1590,24 +1582,6 @@ try:
             unsafe_allow_html=True,
         )
 
-        # Header row: Search + Notification
-        hdr_cols = st.columns([3, 1])
-        with hdr_cols[0]:
-            st.markdown(
-                """
-            <div class="header-search">
-                <span class="header-search-icon">&#128269;</span>
-                <input type="text" placeholder="Search analytics, reviews, models..." readonly>
-            </div>
-            """,
-                unsafe_allow_html=True,
-            )
-        with hdr_cols[1]:
-            st.markdown(
-                '<div class="notif-btn" style="margin-top:2px;">&#128276;</div>',
-                unsafe_allow_html=True,
-            )
-
         st.markdown('<hr class="premium-divider">', unsafe_allow_html=True)
 
         # KPI Row - 3 cards
@@ -1825,20 +1799,6 @@ try:
                     """,
                     unsafe_allow_html=True,
                 )
-
-        st.markdown('<hr class="premium-divider">', unsafe_allow_html=True)
-
-        # Glass Hero Promo
-        st.markdown(
-            """
-        <div class="hero-promo anim-scale">
-            <div class="hero-play">&#9654;</div>
-            <h3>Try Live Analysis</h3>
-            <p>Paste any employee review and get instant sentiment classification with SHAP explanations.</p>
-        </div>
-        """,
-            unsafe_allow_html=True,
-        )
 
         st.markdown('<hr class="premium-divider">', unsafe_allow_html=True)
 
