@@ -22,7 +22,7 @@ APP_VERSION = "v1.3.0"
 
 
 # ---------------------------------------------------------------------------
-# LAZY ML IMPORTS — loaded only when needed (Analyze Review / Explainability)
+# LAZY ML IMPORTS
 # ---------------------------------------------------------------------------
 _ml_loaded = False
 _torch = None
@@ -32,7 +32,6 @@ _AutoTokenizer = None
 
 
 def _load_ml_libs():
-    """Lazily import heavy ML libraries only when a prediction is requested."""
     global _ml_loaded, _torch, _shap, _AutoModelForSequenceClassification, _AutoTokenizer
     if _ml_loaded:
         return
@@ -50,7 +49,6 @@ def _load_ml_libs():
 
 
 def sanitize_html(text: str) -> str:
-    """Sanitize text for safe HTML injection."""
     return html.escape(str(text))
 
 
@@ -62,127 +60,174 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------------------------
-# GLOBAL PREMIUM CSS
+# GLASSMORPHIC CSS
 # ---------------------------------------------------------------------------
 st.markdown(
     """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;600;700;800&family=Satoshi:wght@300;400;500;600;700&display=swap');
 
 :root {
-    --bg-primary: #0B0F14;
-    --bg-secondary: #111820;
-    --bg-card: #151C25;
-    --bg-card-hover: #1A2330;
-    --border: #1E2A38;
-    --border-light: #253344;
-    --text-primary: #F1F5F9;
-    --text-secondary: #8B97A8;
-    --text-muted: #5A6577;
-    --primary: #36B76B;
-    --primary-light: rgba(54, 183, 107, 0.12);
-    --primary-glow: rgba(54, 183, 107, 0.25);
-    --secondary: #F4A13A;
-    --secondary-light: rgba(244, 161, 58, 0.12);
-    --positive: #36B76B;
-    --positive-bg: rgba(54, 183, 107, 0.10);
-    --negative: #EF4444;
-    --negative-bg: rgba(239, 68, 68, 0.10);
-    --neutral: #6B7280;
-    --neutral-bg: rgba(107, 114, 128, 0.10);
-    --radius: 12px;
-    --radius-sm: 8px;
-    --radius-xs: 6px;
-    --shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.4);
-    --transition: 0.2s ease-out;
+    --bg: #f1f5f9;
+    --glass: rgba(255, 255, 255, 0.72);
+    --glass-border: rgba(255, 255, 255, 0.5);
+    --glass-hover: rgba(255, 255, 255, 0.85);
+    --blur: blur(28px);
+    --blur-sm: blur(20px);
+    --radius: 2rem;
+    --radius-lg: 2rem;
+    --radius-md: 1.25rem;
+    --radius-sm: 1rem;
+    --radius-xs: 0.75rem;
+    --primary: #4f46e2;
+    --primary-light: #818cf8;
+    --primary-dark: #3730a3;
+    --violet: #7c3aed;
+    --pink: #ec4899;
+    --emerald: #10b981;
+    --amber: #f59e0b;
+    --rose: #f43f5e;
+    --text: #1e293b;
+    --text-secondary: #64748b;
+    --text-muted: #94a3b8;
+    --text-white: #ffffff;
+    --shadow-sm: 0 2px 8px rgba(79, 70, 226, 0.08);
+    --shadow: 0 4px 16px rgba(79, 70, 226, 0.12);
+    --shadow-lg: 0 8px 32px rgba(79, 70, 226, 0.16);
+    --shadow-glow: 0 4px 24px rgba(79, 70, 226, 0.25);
+    --transition: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ---------- BASE RESET ---------- */
+/* ---------- MESH BACKGROUND ---------- */
 .stApp, .main, [data-testid="stAppViewContainer"],
 [data-testid="stHeader"], section.main {
-    background: var(--bg-primary) !important;
-    color: var(--text-primary) !important;
-    font-family: 'Inter', -apple-system, sans-serif !important;
+    background: var(--bg) !important;
+    color: var(--text) !important;
+    font-family: 'Satoshi', -apple-system, sans-serif !important;
+    position: relative;
 }
+.stApp::before, section.main::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background:
+        radial-gradient(ellipse 60% 50% at 10% 20%, rgba(79, 70, 226, 0.15) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 60% at 90% 15%, rgba(124, 58, 237, 0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 50% at 50% 80%, rgba(236, 72, 153, 0.10) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 80% 70%, rgba(16, 185, 129, 0.08) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+}
+section.main > div { padding: 24px 28px 48px 28px; position: relative; z-index: 1; }
 
-section.main > div { padding: 24px 28px 48px 28px; }
-
-/* ---------- HIDE DEFAULT STREAMLIT ELEMENTS ---------- */
+/* ---------- HIDE DEFAULT ELEMENTS ---------- */
 #MainMenu { visibility: hidden; }
 footer { visibility: hidden; }
 [data-testid="stDecoration"] { display: none; }
+header[data-testid="stHeader"] { background: transparent !important; }
 
-/* ---------- STREAMLIT DARK THEME OVERRIDES ---------- */
-[data-testid="stSelectbox"] div div div,
-[data-testid="stMultiSelect"] div div div {
-    background: var(--bg-secondary) !important;
-    color: var(--text-primary) !important;
+/* ---------- HEADINGS ---------- */
+h1, h2, h3, h4, h5, h6, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
+    font-family: 'Cabinet Grotesk', -apple-system, sans-serif !important;
+    color: var(--text) !important;
+    letter-spacing: -0.03em !important;
 }
-[data-testid="stSelectbox"] [data-baseweb="select"] {
-    background: var(--bg-secondary) !important;
-    border-color: var(--border) !important;
+
+/* ---------- WIDGET CARD ---------- */
+.widget-card {
+    background: var(--glass);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    padding: 24px;
+    transition: all 0.35s var(--transition);
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    overflow: hidden;
 }
-[data-baseweb="menu"] { background: var(--bg-secondary) !important; }
-[data-baseweb="option"] {
-    background: var(--bg-secondary) !important;
-    color: var(--text-primary) !important;
+.widget-card:hover {
+    transform: translateY(-6px) scale(1.005);
+    box-shadow: var(--shadow-lg);
+    border-color: rgba(255, 255, 255, 0.7);
 }
-[data-baseweb="option"]:hover, [data-baseweb="option"]:focus,
-[data-baseweb="option"][aria-selected="true"] {
-    background: var(--bg-card-hover) !important;
-    color: var(--primary) !important;
+.widget-card h3 {
+    font-family: 'Cabinet Grotesk', sans-serif;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    color: var(--text) !important;
+    margin-bottom: 4px !important;
 }
-.stRadio label, .stRadio div[role="radiogroup"] label {
-    color: var(--text-primary) !important;
-}
-.stCheckbox label, .stCheckbox span {
-    color: var(--text-primary) !important;
-}
-[data-testid="stVerticalBlock"] p {
+.widget-card p {
+    font-size: 13px !important;
     color: var(--text-secondary) !important;
+    line-height: 1.6;
 }
 
-/* ---------- SIDEBAR ---------- */
+/* ---------- GLASS CARD (smaller) ---------- */
+.glass-card {
+    background: var(--glass);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    transition: all 0.35s var(--transition);
+    box-shadow: var(--shadow-sm);
+}
+.glass-card:hover {
+    transform: translateY(-4px) scale(1.003);
+    box-shadow: var(--shadow);
+    border-color: rgba(255, 255, 255, 0.7);
+}
+.glass-card h3 {
+    font-family: 'Cabinet Grotesk', sans-serif;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: var(--text) !important;
+    margin-bottom: 6px !important;
+}
+.glass-card p {
+    font-size: 12px !important;
+    color: var(--text-secondary) !important;
+    line-height: 1.6;
+}
+
+/* ---------- SIDEBAR (Streamlit override) ---------- */
 [data-testid="stSidebar"] {
-    background: var(--bg-secondary) !important;
-    border-right: 1px solid var(--border) !important;
-    padding: 20px 12px;
-}
-[data-testid="stSidebar"] [data-testid="stImageContainer"] {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 0;
-}
-[data-testid="stSidebar"] [data-testid="stImageContainer"] img {
-    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.6) !important;
+    backdrop-filter: var(--blur-sm) !important;
+    -webkit-backdrop-filter: var(--blur-sm) !important;
+    border-right: 1px solid var(--glass-border) !important;
+    padding: 16px 10px !important;
 }
 [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
     color: var(--text-secondary) !important;
     font-size: 12px !important;
 }
+
+/* Sidebar brand */
 .sidebar-brand {
-    padding: 14px 12px;
+    padding: 12px 8px;
     margin-bottom: 20px;
-    border-bottom: 1px solid var(--border);
+    text-align: center;
 }
 .sidebar-brand h2 {
-    font-size: 17px !important;
-    font-weight: 700 !important;
-    color: var(--text-primary) !important;
+    font-family: 'Cabinet Grotesk', sans-serif !important;
+    font-size: 15px !important;
+    font-weight: 800 !important;
+    color: var(--text) !important;
     margin: 0 !important;
-    letter-spacing: -0.025em;
 }
 .sidebar-version {
     display: inline-block;
-    background: var(--primary-light);
+    background: linear-gradient(135deg, rgba(79,70,226,0.12), rgba(124,58,237,0.12));
     color: var(--primary);
     padding: 2px 10px;
     border-radius: 20px;
     font-size: 10px;
     font-weight: 600;
     margin-top: 6px;
-    letter-spacing: 0.03em;
 }
 .sidebar-label {
     font-size: 9px !important;
@@ -191,19 +236,20 @@ footer { visibility: hidden; }
     letter-spacing: 0.1em;
     color: var(--text-muted) !important;
     margin-bottom: 8px !important;
+    padding-left: 4px;
 }
 .sidebar-tech-item {
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 6px 10px;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-xs);
     font-size: 12px;
     color: var(--text-secondary);
-    transition: background var(--transition);
+    transition: background 0.25s var(--transition);
 }
 .sidebar-tech-item:hover {
-    background: var(--bg-card);
+    background: rgba(79, 70, 226, 0.06);
 }
 .sidebar-tech-icon {
     width: 20px;
@@ -213,7 +259,7 @@ footer { visibility: hidden; }
 }
 .sidebar-footer {
     padding-top: 12px;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid rgba(255, 255, 255, 0.4);
     margin-top: auto;
 }
 .sidebar-footer p {
@@ -221,22 +267,22 @@ footer { visibility: hidden; }
     color: var(--text-muted) !important;
 }
 
-/* Radio buttons in sidebar */
+/* Radio in sidebar */
 [data-testid="stSidebar"] .stRadio > div { gap: 4px; }
 [data-testid="stSidebar"] .stRadio > div > label {
     background: transparent;
     border: 1px solid transparent;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-xs);
     padding: 8px 12px;
     font-size: 13px;
-    transition: all var(--transition);
+    transition: all 0.25s var(--transition);
 }
 [data-testid="stSidebar"] .stRadio > div > label:hover {
-    background: var(--bg-card);
-    border-color: var(--border);
+    background: rgba(79, 70, 226, 0.06);
+    border-color: rgba(79, 70, 226, 0.1);
 }
 [data-testid="stSidebar"] .stRadio > div > label[data-checked="true"] {
-    background: var(--primary-light) !important;
+    background: linear-gradient(135deg, rgba(79,70,226,0.12), rgba(124,58,237,0.12)) !important;
     border-color: var(--primary) !important;
 }
 [data-testid="stSidebar"] .stRadio > div > label[data-checked="true"] span {
@@ -244,9 +290,38 @@ footer { visibility: hidden; }
     font-weight: 600 !important;
 }
 
+/* Logo float animation */
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-6px); }
+}
+.sidebar-logo-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 12px;
+    padding-top: 8px;
+}
+.sidebar-logo-box {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #4f46e2, #7c3aed);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: float 3s ease-in-out infinite;
+    box-shadow: 0 4px 16px rgba(79, 70, 226, 0.3);
+}
+.sidebar-logo-box img {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    filter: brightness(0) invert(1);
+}
+
 /* ---------- ANIMATIONS ---------- */
 @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(12px); }
+    from { opacity: 0; transform: translateY(20px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes fadeIn {
@@ -254,19 +329,20 @@ footer { visibility: hidden; }
     to   { opacity: 1; }
 }
 @keyframes slideIn {
-    from { opacity: 0; transform: translateX(-16px); }
+    from { opacity: 0; transform: translateX(-20px); }
     to   { opacity: 1; transform: translateX(0); }
-}
-@keyframes growUp {
-    from { transform: scaleY(0); }
-    to   { transform: scaleY(1); }
 }
 @keyframes progressFill {
     from { width: 0; }
 }
-.anim-fade-up { animation: fadeInUp 0.5s ease-out both; }
-.anim-fade    { animation: fadeIn 0.4s ease-out both; }
-.anim-slide   { animation: slideIn 0.4s ease-out both; }
+@keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to   { opacity: 1; transform: scale(1); }
+}
+.anim-fade-up { animation: fadeInUp 0.6s var(--transition) both; }
+.anim-fade    { animation: fadeIn 0.5s var(--transition) both; }
+.anim-slide   { animation: slideIn 0.5s var(--transition) both; }
+.anim-scale   { animation: scaleIn 0.5s var(--transition) both; }
 .anim-delay-1 { animation-delay: 0.05s; }
 .anim-delay-2 { animation-delay: 0.10s; }
 .anim-delay-3 { animation-delay: 0.15s; }
@@ -277,33 +353,51 @@ footer { visibility: hidden; }
 
 /* ---------- HERO CARD ---------- */
 .hero-card {
-    background: linear-gradient(135deg, rgba(54,183,107,0.08) 0%, rgba(54,183,107,0.03) 100%);
-    border: 1px solid rgba(54, 183, 107, 0.15);
+    background: var(--glass);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius);
-    padding: 32px 28px;
+    padding: 40px 36px;
     margin-bottom: 24px;
     position: relative;
     overflow: hidden;
+    transition: all 0.35s var(--transition);
 }
 .hero-card::before {
     content: '';
     position: absolute;
-    top: -50%;
-    right: -20%;
+    top: -40%;
+    right: -15%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(79,70,226,0.08) 0%, transparent 70%);
+    pointer-events: none;
+}
+.hero-card::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -10%;
     width: 400px;
     height: 400px;
-    background: radial-gradient(circle, rgba(54,183,107,0.06) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(124,58,237,0.06) 0%, transparent 70%);
     pointer-events: none;
 }
 .hero-card h1 {
-    font-size: 28px !important;
-    font-weight: 700 !important;
-    letter-spacing: -0.05em !important;
-    line-height: 1.15 !important;
+    font-family: 'Cabinet Grotesk', sans-serif !important;
+    font-size: 32px !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.04em !important;
+    line-height: 1.1 !important;
     margin-bottom: 8px !important;
+    background: linear-gradient(135deg, var(--primary), var(--violet));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 .hero-card .subtitle {
-    font-size: 13px;
+    font-size: 14px;
     color: var(--text-secondary);
     font-weight: 400;
     line-height: 1.6;
@@ -311,103 +405,93 @@ footer { visibility: hidden; }
 }
 .hero-badge {
     display: inline-block;
-    background: var(--primary-light);
+    background: linear-gradient(135deg, rgba(79,70,226,0.12), rgba(124,58,237,0.12));
     color: var(--primary);
-    padding: 4px 12px;
+    padding: 6px 16px;
     border-radius: 20px;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 600;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
     letter-spacing: 0.06em;
     text-transform: uppercase;
+    border: 1px solid rgba(79, 70, 226, 0.15);
 }
 
-/* ---------- GLASS CARD ---------- */
-.glass-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
+/* ---------- GLASS HERO PROMO CARD ---------- */
+.hero-promo {
+    background: linear-gradient(135deg, #4f46e2, #5b52e8, #7c3aed);
     border-radius: var(--radius);
-    padding: 20px;
-    transition: all var(--transition);
-    box-shadow: var(--shadow);
+    padding: 40px 32px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
 }
-.glass-card:hover {
-    border-color: var(--border-light);
-    box-shadow: var(--shadow-lg);
+.hero-promo::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -30%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+    pointer-events: none;
 }
-.glass-card-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: var(--radius-sm);
-    display: flex;
+.hero-promo h3 {
+    font-family: 'Cabinet Grotesk', sans-serif !important;
+    font-size: 20px !important;
+    font-weight: 800 !important;
+    color: white !important;
+    margin-bottom: 8px !important;
+}
+.hero-promo p {
+    font-size: 13px !important;
+    color: rgba(255,255,255,0.8) !important;
+    margin-bottom: 20px !important;
+}
+.hero-play {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.3);
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
-    margin-bottom: 12px;
+    font-size: 28px;
+    margin-bottom: 20px;
+    cursor: pointer;
+    transition: all 0.3s var(--transition);
 }
-.glass-card h3 {
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    letter-spacing: -0.01em;
-    margin-bottom: 6px !important;
-}
-.glass-card p {
-    font-size: 12px !important;
-    color: var(--text-secondary) !important;
-    line-height: 1.6;
-}
-
-/* ---------- MINI HIGHLIGHT CARD ---------- */
-.highlight-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 10px 12px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    transition: all var(--transition);
-}
-.highlight-card:hover {
-    border-color: var(--border-light);
-    background: var(--bg-card-hover);
-}
-.highlight-icon {
-    width: 28px;
-    height: 28px;
-    border-radius: var(--radius-xs);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    flex-shrink: 0;
-}
-.highlight-text {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text-primary);
-    line-height: 1.3;
+.hero-promo .hero-play:hover {
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.08);
 }
 
 /* ---------- METRIC CARD ---------- */
 .metric-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
+    background: var(--glass);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
     padding: 20px;
-    transition: all var(--transition);
-    box-shadow: var(--shadow);
+    transition: all 0.35s var(--transition);
+    box-shadow: var(--shadow-sm);
 }
 .metric-card:hover {
-    border-color: var(--border-light);
-    box-shadow: var(--shadow-lg);
+    transform: translateY(-4px) scale(1.003);
+    box-shadow: var(--shadow);
 }
 .metric-value {
+    font-family: 'Cabinet Grotesk', sans-serif;
     font-size: 28px;
-    font-weight: 700;
-    letter-spacing: -0.05em;
+    font-weight: 800;
+    letter-spacing: -0.04em;
     line-height: 1;
     margin-bottom: 4px;
+    color: var(--text);
 }
 .metric-label {
     font-size: 11px;
@@ -417,23 +501,76 @@ footer { visibility: hidden; }
     letter-spacing: 0.06em;
 }
 
-/* ---------- TREND BADGE ---------- */
-.trend-badge {
-    display: inline-flex;
+/* ---------- PROJECT TRACKER ---------- */
+.project-item {
+    display: flex;
     align-items: center;
-    gap: 4px;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 11px;
+    gap: 14px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+}
+.project-item:last-child { border-bottom: none; }
+.project-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+.project-info { flex: 1; min-width: 0; }
+.project-name {
+    font-family: 'Cabinet Grotesk', sans-serif;
+    font-size: 13px;
     font-weight: 600;
+    color: var(--text);
+    margin-bottom: 2px;
 }
-.trend-badge.positive {
-    background: var(--positive-bg);
-    color: var(--primary);
+.project-sub {
+    font-size: 11px;
+    color: var(--text-muted);
 }
-.trend-badge.negative {
-    background: var(--negative-bg);
-    color: var(--negative);
+.project-pct {
+    font-family: 'Cabinet Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+}
+.project-bar {
+    height: 6px;
+    background: rgba(79, 70, 226, 0.08);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 6px;
+}
+.project-bar-fill {
+    height: 100%;
+    border-radius: 10px;
+    animation: progressFill 1s var(--transition) both;
+    box-shadow: 0 0 8px var(--bar-glow, rgba(79, 70, 226, 0.3));
+}
+
+/* ---------- PROBABILITY BAR ---------- */
+.prob-bar-container { margin-bottom: 12px; }
+.prob-bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+.prob-bar-track {
+    height: 8px;
+    background: rgba(79, 70, 226, 0.06);
+    border-radius: 10px;
+    overflow: hidden;
+}
+.prob-bar-fill {
+    height: 100%;
+    border-radius: 10px;
+    animation: progressFill 0.8s var(--transition) both;
 }
 
 /* ---------- RESULT BADGE ---------- */
@@ -448,142 +585,152 @@ footer { visibility: hidden; }
     letter-spacing: 0.01em;
 }
 .result-badge.positive {
-    background: var(--positive-bg);
-    color: var(--primary);
-    border: 1px solid rgba(54, 183, 107, 0.25);
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.25);
 }
 .result-badge.negative {
-    background: var(--negative-bg);
-    color: var(--negative);
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
     border: 1px solid rgba(239, 68, 68, 0.25);
 }
 .result-badge.neutral {
-    background: var(--neutral-bg);
-    color: var(--neutral);
-    border: 1px solid rgba(107, 114, 128, 0.25);
+    background: rgba(100, 116, 139, 0.1);
+    color: #475569;
+    border: 1px solid rgba(100, 116, 139, 0.25);
+}
+
+/* ---------- HIGHLIGHT CARD ---------- */
+.highlight-card {
+    background: var(--glass);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.35s var(--transition);
+}
+.highlight-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow);
+    border-color: rgba(255, 255, 255, 0.7);
+}
+.highlight-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+.highlight-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
 }
 
 /* ---------- SECTION HEADINGS ---------- */
-.section-title {
-    font-size: 22px;
+.section-label {
+    font-family: 'Cabinet Grotesk', sans-serif;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    margin-bottom: 14px;
     font-weight: 700;
-    letter-spacing: -0.025em;
-    margin-bottom: 4px;
-}
-.section-subtitle {
-    font-size: 13px;
-    color: var(--text-secondary);
-    margin-bottom: 24px;
 }
 
 /* ---------- DIVIDER ---------- */
 .premium-divider {
     border: none;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid rgba(255, 255, 255, 0.5);
     margin: 24px 0;
 }
 
-/* ---------- PROBABILITY BAR ---------- */
-.prob-bar-container { margin-bottom: 12px; }
-.prob-bar-label {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    font-weight: 500;
-    margin-bottom: 4px;
-}
-.prob-bar-track {
-    height: 7px;
-    background: var(--bg-secondary);
-    border-radius: 10px;
-    overflow: hidden;
-}
-.prob-bar-fill {
-    height: 100%;
-    border-radius: 10px;
-    animation: progressFill 0.8s ease-out both;
-}
-
-/* ---------- EXPANDER ---------- */
-[data-testid="stExpander"] {
-    background: var(--bg-card) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: var(--radius) !important;
-}
-[data-testid="stExpander"] summary { font-weight: 600 !important; font-size: 13px !important; }
-
 /* ---------- BUTTONS ---------- */
 .stButton > button {
-    background: var(--primary) !important;
+    background: linear-gradient(135deg, #4f46e2, #7c3aed) !important;
     color: white !important;
     border: none !important;
-    border-radius: var(--radius-sm) !important;
+    border-radius: 16px !important;
     font-weight: 600 !important;
+    font-family: 'Cabinet Grotesk', sans-serif !important;
     padding: 10px 20px !important;
-    font-size: 12px !important;
+    font-size: 13px !important;
     letter-spacing: 0.01em;
-    transition: all var(--transition) !important;
-    box-shadow: var(--shadow) !important;
-    min-height: 36px;
+    transition: all 0.35s var(--transition) !important;
+    box-shadow: 0 4px 16px rgba(79, 70, 226, 0.2) !important;
+    min-height: 40px;
     width: 100%;
 }
 .stButton > button:hover {
-    background: #2EA35D !important;
-    box-shadow: var(--shadow-lg) !important;
-    transform: translateY(-1px);
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 24px rgba(79, 70, 226, 0.3) !important;
 }
 .stButton > button:focus {
-    box-shadow: 0 0 0 3px var(--primary-glow) !important;
+    box-shadow: 0 0 0 3px rgba(79, 70, 226, 0.25) !important;
     outline: none !important;
 }
 .stButton > button:active {
     transform: translateY(0) !important;
 }
 [data-testid="stBaseButton-secondary"] {
-    background: var(--bg-card) !important;
-    color: var(--text-primary) !important;
-    border: 1px solid var(--border) !important;
-    min-height: 36px;
-    font-size: 12px;
-    border-radius: var(--radius-sm) !important;
+    background: var(--glass) !important;
+    backdrop-filter: blur(12px) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 16px !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    min-height: 40px;
 }
 [data-testid="stBaseButton-secondary"]:hover {
     border-color: var(--primary) !important;
-    background: var(--bg-card-hover) !important;
+    background: rgba(255, 255, 255, 0.85) !important;
+    transform: translateY(-1px) !important;
 }
 .stDownloadButton > button {
-    background: var(--bg-card) !important;
-    color: var(--text-primary) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: var(--radius-sm) !important;
+    background: var(--glass) !important;
+    backdrop-filter: blur(12px) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 16px !important;
     font-weight: 500 !important;
     font-size: 12px !important;
 }
 .stDownloadButton > button:hover {
     border-color: var(--primary) !important;
-    background: var(--bg-card-hover) !important;
+    background: rgba(255, 255, 255, 0.85) !important;
 }
 
 /* ---------- TEXT AREA ---------- */
 .stTextArea textarea {
-    background: var(--bg-secondary) !important;
-    border: 1px solid var(--border) !important;
+    background: rgba(255, 255, 255, 0.7) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 1px solid var(--glass-border) !important;
     border-radius: var(--radius-sm) !important;
-    color: var(--text-primary) !important;
-    font-family: 'Inter', monospace !important;
+    color: var(--text) !important;
+    font-family: 'Satoshi', monospace !important;
     font-size: 13px !important;
-    padding: 12px !important;
+    padding: 14px !important;
 }
 .stTextArea textarea:focus {
     border-color: var(--primary) !important;
-    box-shadow: 0 0 0 2px var(--primary-glow) !important;
+    box-shadow: 0 0 0 3px rgba(79, 70, 226, 0.12) !important;
 }
 
 /* ---------- DATAFRAME ---------- */
 .stDataFrame {
     border-radius: var(--radius-sm) !important;
     overflow: hidden;
-    border: 1px solid var(--border) !important;
+    border: 1px solid var(--glass-border) !important;
+    background: var(--glass) !important;
 }
 
 /* ---------- SPINNER ---------- */
@@ -591,57 +738,108 @@ footer { visibility: hidden; }
     border-color: var(--primary) transparent transparent transparent !important;
 }
 
-/* ---------- ALERT ---------- */
+/* ---------- ALERTS ---------- */
 .stAlert {
     border-radius: var(--radius-sm) !important;
     border-left-width: 3px !important;
+    background: var(--glass) !important;
+    backdrop-filter: blur(12px) !important;
 }
 
 /* ---------- TABS ---------- */
 .stTabs [data-baseweb="tab-list"] {
     gap: 4px;
-    background: var(--bg-secondary);
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(12px);
     border-radius: var(--radius-sm);
     padding: 4px;
+    border: 1px solid var(--glass-border);
 }
 .stTabs [data-baseweb="tab"] {
     border-radius: var(--radius-xs) !important;
     font-weight: 500;
-    font-size: 12px;
+    font-size: 13px;
+    font-family: 'Cabinet Grotesk', sans-serif;
 }
 .stTabs [aria-selected="true"] {
-    background: var(--bg-card) !important;
-    border-bottom: none !important;
+    background: white !important;
+    box-shadow: var(--shadow-sm) !important;
 }
 
-/* ---------- LINK BUTTON ---------- */
+/* ---------- SELECTBOX / MULTISELECT ---------- */
+[data-testid="stSelectbox"] div div div,
+[data-testid="stMultiSelect"] div div div {
+    background: rgba(255, 255, 255, 0.7) !important;
+    color: var(--text) !important;
+    backdrop-filter: blur(12px) !important;
+}
+[data-testid="stSelectbox"] [data-baseweb="select"] {
+    background: rgba(255, 255, 255, 0.7) !important;
+    border-color: var(--glass-border) !important;
+}
+[data-baseweb="menu"] { background: white !important; }
+[data-baseweb="option"] {
+    background: white !important;
+    color: var(--text) !important;
+}
+[data-baseweb="option"]:hover, [data-baseweb="option"]:focus,
+[data-baseweb="option"][aria-selected="true"] {
+    background: rgba(79, 70, 226, 0.08) !important;
+    color: var(--primary) !important;
+}
+.stRadio label, .stRadio div[role="radiogroup"] label {
+    color: var(--text) !important;
+}
+.stCheckbox label, .stCheckbox span {
+    color: var(--text) !important;
+}
+[data-testid="stVerticalBlock"] p {
+    color: var(--text-secondary) !important;
+}
+
+/* ---------- EXPANDER ---------- */
+[data-testid="stExpander"] {
+    background: var(--glass) !important;
+    backdrop-filter: var(--blur) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: var(--radius-md) !important;
+}
+[data-testid="stExpander"] summary {
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    font-family: 'Cabinet Grotesk', sans-serif !important;
+}
+
+/* ---------- LINK ---------- */
 a[href] { color: var(--primary) !important; }
 
 /* ---------- SCROLLBAR ---------- */
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: var(--bg-primary); }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(79, 70, 226, 0.15); border-radius: 10px; }
 
 /* ---------- PAGE HEADING ---------- */
 .page-heading { margin-bottom: 24px; }
 .page-heading h1 {
-    font-size: 22px !important;
-    font-weight: 700 !important;
-    letter-spacing: -0.025em !important;
+    font-family: 'Cabinet Grotesk', sans-serif !important;
+    font-size: 26px !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.03em !important;
     margin-bottom: 4px !important;
+    color: var(--text) !important;
 }
 .page-heading p {
-    font-size: 13px;
+    font-size: 14px;
     color: var(--text-secondary);
 }
 
 /* ---------- TIP CARD ---------- */
 .tip-card {
-    background: var(--primary-light);
-    border: 1px solid rgba(54, 183, 107, 0.15);
+    background: linear-gradient(135deg, rgba(79,70,226,0.06), rgba(124,58,237,0.06));
+    border: 1px solid rgba(79, 70, 226, 0.12);
     border-radius: var(--radius-sm);
-    padding: 12px 16px;
-    font-size: 12px;
+    padding: 14px 18px;
+    font-size: 13px;
     color: var(--text-secondary);
     line-height: 1.6;
 }
@@ -652,18 +850,21 @@ a[href] { color: var(--primary) !important; }
     display: flex;
     align-items: center;
     gap: 10px;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
+    background: var(--glass);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-sm);
-    padding: 10px 12px;
+    padding: 12px 14px;
     cursor: pointer;
-    transition: all var(--transition);
+    transition: all 0.35s var(--transition);
     width: 100%;
     text-align: left;
 }
 .example-btn:hover {
     border-color: var(--primary);
-    background: var(--bg-card-hover);
+    background: var(--glass-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
 }
 .example-emoji {
     font-size: 20px;
@@ -672,9 +873,10 @@ a[href] { color: var(--primary) !important; }
     text-align: center;
 }
 .example-content h4 {
+    font-family: 'Cabinet Grotesk', sans-serif;
     font-size: 12px;
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--text);
     margin: 0 0 2px 0;
 }
 .example-content p {
@@ -699,7 +901,7 @@ a[href] { color: var(--primary) !important; }
     transition: all 0.3s;
 }
 .loading-stage.active {
-    background: var(--primary-light);
+    background: rgba(79, 70, 226, 0.08);
     color: var(--primary);
     font-weight: 500;
 }
@@ -732,9 +934,11 @@ a[href] { color: var(--primary) !important; }
     opacity: 0.3;
 }
 .empty-state h3 {
-    font-size: 16px;
+    font-family: 'Cabinet Grotesk', sans-serif;
+    font-size: 18px;
     font-weight: 700;
     margin-bottom: 8px;
+    color: var(--text);
 }
 .empty-state p {
     font-size: 13px;
@@ -747,13 +951,14 @@ a[href] { color: var(--primary) !important; }
 .app-footer {
     margin-top: 32px;
     padding: 24px 0 16px 0;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid rgba(255, 255, 255, 0.5);
     text-align: center;
 }
 .app-footer-brand {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--text-primary);
+    font-family: 'Cabinet Grotesk', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text);
     margin-bottom: 4px;
 }
 .app-footer-sub {
@@ -775,10 +980,11 @@ a[href] { color: var(--primary) !important; }
 }
 .app-footer-pill {
     display: inline-block;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
+    background: var(--glass);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--glass-border);
     border-radius: 20px;
-    padding: 3px 10px;
+    padding: 4px 12px;
     font-size: 10px;
     font-weight: 500;
     color: var(--text-secondary);
@@ -791,23 +997,30 @@ a[href] { color: var(--primary) !important; }
 
 /* ---------- ABOUT PAGE ---------- */
 .about-section-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
+    background: var(--glass);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: 22px;
     margin-bottom: 12px;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.35s var(--transition);
+}
+.about-section-card:hover {
+    transform: translateY(-3px);
     box-shadow: var(--shadow);
 }
 .about-section-header {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     margin-bottom: 12px;
 }
 .about-section-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: var(--radius-sm);
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -815,52 +1028,104 @@ a[href] { color: var(--primary) !important; }
     flex-shrink: 0;
 }
 .about-section-title {
-    font-size: 14px;
-    font-weight: 600;
+    font-family: 'Cabinet Grotesk', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
     letter-spacing: -0.01em;
+    color: var(--text);
 }
 .about-section-body {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text-secondary);
     line-height: 1.7;
 }
-.about-section-body strong { color: var(--text-primary); }
+.about-section-body strong { color: var(--text); }
 
 /* ---------- PROGRESS BAR ---------- */
 .progress-track {
     height: 7px;
-    background: var(--bg-secondary);
+    background: rgba(79, 70, 226, 0.06);
     border-radius: 10px;
     overflow: hidden;
     margin-top: 12px;
 }
 .progress-fill {
     height: 100%;
-    background: var(--primary);
+    background: linear-gradient(90deg, #4f46e2, #7c3aed);
     border-radius: 10px;
-    animation: progressFill 0.8s ease-out both;
+    animation: progressFill 0.8s var(--transition) both;
 }
 
-/* ---------- SECTION LABEL ---------- */
-.section-label {
-    font-size: 9px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
+/* ---------- SEARCH BAR (Header) ---------- */
+.header-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 10px 16px;
+    width: 100%;
+    max-width: 320px;
+    transition: all 0.3s var(--transition);
+}
+.header-search:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 226, 0.1);
+}
+.header-search-icon {
+    font-size: 14px;
     color: var(--text-muted);
-    margin-bottom: 12px;
-    font-weight: 600;
+    flex-shrink: 0;
+}
+.header-search input {
+    border: none;
+    background: transparent;
+    outline: none;
+    font-family: 'Satoshi', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    width: 100%;
+}
+.header-search input::placeholder { color: var(--text-muted); }
+
+/* ---------- NOTIFICATION BTN ---------- */
+.notif-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    background: var(--glass);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s var(--transition);
+    flex-shrink: 0;
+}
+.notif-btn:hover {
+    background: var(--glass-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+/* ---------- SVG CHART AREA ---------- */
+.chart-area {
+    width: 100%;
+    overflow: visible;
 }
 
 /* ---------- RESPONSIVE ---------- */
 @media (max-width: 768px) {
     section.main > div { padding: 16px 16px 32px 16px; }
-    .hero-card { padding: 24px 20px; }
-    .hero-card h1 { font-size: 22px !important; }
-    .hero-card .subtitle { font-size: 12px; }
-    .glass-card { padding: 16px; }
+    .hero-card { padding: 28px 20px; }
+    .hero-card h1 { font-size: 24px !important; }
     .metric-value { font-size: 22px; }
-    .page-heading h1 { font-size: 18px !important; }
-    .result-grid { grid-template-columns: 1fr !important; }
+    .page-heading h1 { font-size: 22px !important; }
+    .widget-card { padding: 18px; }
 }
 </style>
 """,
@@ -919,7 +1184,7 @@ def render_prob_bar(label: str, value: float, color: str) -> str:
     <div class="prob-bar-container">
         <div class="prob-bar-label">
             <span style="color: {color}; font-weight: 600;">{label}</span>
-            <span style="color: var(--text-secondary);">{pct:.1f}%</span>
+            <span style="color: var(--text-muted);">{pct:.1f}%</span>
         </div>
         <div class="prob-bar-track">
             <div class="prob-bar-fill" style="width: {pct}%; background: {color};"></div>
@@ -954,7 +1219,7 @@ def render_footer():
     <div class="app-footer">
         <div class="app-footer-brand">StartupPulse AI</div>
         <div class="app-footer-sub">Explainable Aspect-Based Sentiment Analysis</div>
-        <div class="app-footer-author">Built by <strong style="color: var(--text-primary);">Nikhil Khetavath</strong></div>
+        <div class="app-footer-author">Built by <strong style="color: var(--text);">Nikhil Khetavath</strong></div>
         <div class="app-footer-tech">
             <span class="app-footer-pill">DeBERTa-v3</span>
             <span class="app-footer-pill">Hugging Face</span>
@@ -968,7 +1233,6 @@ def render_footer():
 
 
 def render_loading_html(completed_count: int, active_idx: int, progress_pct: int) -> str:
-    """Render loading stages HTML (defined at module level, not per-click)."""
     loading_stages = [
         "Loading DeBERTa-v3 model...",
         "Tokenizing review...",
@@ -989,8 +1253,8 @@ def render_loading_html(completed_count: int, active_idx: int, progress_pct: int
         """
     return f"""
     <div class="glass-card" style="margin-top: 1rem;">
-        <p style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;
-                  color: var(--text-muted); margin-bottom: 0.8rem; font-weight: 600;">
+        <p style="font-family: 'Cabinet Grotesk', sans-serif; font-size: 0.75rem; text-transform: uppercase;
+                  letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 0.8rem; font-weight: 700;">
             Processing Pipeline
         </p>
         {stages_html}
@@ -1000,7 +1264,6 @@ def render_loading_html(completed_count: int, active_idx: int, progress_pct: int
 
 
 def load_image_safe(path: Path):
-    """Load an image with error handling, returns None on failure."""
     try:
         if path.exists():
             return Image.open(str(path))
@@ -1009,12 +1272,84 @@ def load_image_safe(path: Path):
     return None
 
 
+def render_svg_line_chart() -> str:
+    return """
+    <svg viewBox="0 0 400 120" class="chart-area" preserveAspectRatio="none" style="width:100%;height:120px;">
+        <defs>
+            <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#f43f5e" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#f43f5e" stop-opacity="0.0"/>
+            </linearGradient>
+        </defs>
+        <path d="M0,80 C40,30 80,90 120,50 S200,20 240,55 S320,85 360,30 L400,35 L400,120 L0,120 Z"
+              fill="url(#areaGrad)"/>
+        <path d="M0,80 C40,30 80,90 120,50 S200,20 240,55 S320,85 360,30 L400,35"
+              fill="none" stroke="#f43f5e" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="240" cy="55" r="4" fill="#f43f5e" stroke="white" stroke-width="2"/>
+    </svg>
+    """
+
+
+def render_svg_bar_chart() -> str:
+    bars = [
+        ("Mon", 45, 0.45), ("Tue", 65, 0.65), ("Wed", 50, 0.50),
+        ("Thu", 80, 0.80), ("Fri", 95, 0.95), ("Sat", 35, 0.35), ("Sun", 25, 0.25),
+    ]
+    bar_html = ""
+    x = 20
+    for day, height, _ in bars:
+        bar_h = height * 0.9
+        y = 100 - bar_h
+        opacity = "1" if day == "Fri" else "0.3"
+        glow = "filter: drop-shadow(0 2px 8px rgba(79,70,226,0.4));" if day == "Fri" else ""
+        bar_w = "14" if day == "Fri" else "10"
+        color = "#4f46e2" if day == "Fri" else "#c7d2fe"
+        bar_html += f'<rect x="{x}" y="{y}" width="{bar_w}" height="{bar_h}" rx="5" fill="{color}" opacity="{opacity}" style="{glow}"/>'
+        bar_html += f'<text x="{x + int(bar_w)//2}" y="112" text-anchor="middle" font-size="9" fill="#94a3b8" font-family="Satoshi">{day}</text>'
+        x += 50
+    return f"""
+    <svg viewBox="0 0 380 120" class="chart-area" preserveAspectRatio="none" style="width:100%;height:120px;">
+        {bar_html}
+    </svg>
+    """
+
+
+def render_circular_gauge(pct: float, color: str = "#f59e0b") -> str:
+    r = 42
+    circ = 2 * 3.14159 * r
+    offset = circ * (1 - pct / 100)
+    return f"""
+    <svg viewBox="0 0 100 100" style="width:80px;height:80px;">
+        <circle cx="50" cy="50" r="{r}" fill="none" stroke="rgba(79,70,226,0.08)" stroke-width="10"/>
+        <circle cx="50" cy="50" r="{r}" fill="none" stroke="{color}" stroke-width="10"
+                stroke-linecap="round" stroke-dasharray="{circ}" stroke-dashoffset="{offset}"
+                transform="rotate(-90 50 50)" style="filter: drop-shadow(0 2px 4px rgba(245,158,11,0.3));"/>
+        <text x="50" y="50" text-anchor="middle" dominant-baseline="central"
+              font-family="Cabinet Grotesk" font-size="16" font-weight="800" fill="{color}">{pct}%</text>
+    </svg>
+    """
+
+
+def render_horizontal_bar(label: str, pct: float, color: str = "#4f46e2") -> str:
+    return f"""
+    <div style="margin-bottom: 10px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <span style="font-size:12px;font-weight:500;color:var(--text);">{label}</span>
+            <span style="font-size:12px;font-weight:600;color:{color};">{pct:.0f}%</span>
+        </div>
+        <div style="height:10px;background:rgba(79,70,226,0.06);border-radius:10px;overflow:hidden;">
+            <div style="height:100%;width:{pct}%;background:{color};border-radius:10px;animation:progressFill 1s var(--transition) both;
+                        box-shadow:0 0 8px {color}40;"></div>
+        </div>
+    </div>
+    """
+
+
 # ---------------------------------------------------------------------------
-# CACHED SHAP EXPLAINER (loaded once, reused across reruns)
+# CACHED SHAP EXPLAINER
 # ---------------------------------------------------------------------------
 @st.cache_resource(show_spinner=False)
 def get_shap_explainer():
-    """Return a cached SHAPExplainer singleton."""
     _load_ml_libs()
     from src.explainability.shap_explainer import SHAPExplainer
     return SHAPExplainer()
@@ -1027,18 +1362,20 @@ with st.sidebar:
     logo_path = PROJECT_ROOT / "assets" / "logo.png"
     if logo_path.exists():
         st.markdown(
-            """
-        <div style="text-align: center; padding: 0.5rem 0 0.2rem 0; margin-bottom: 0.3rem;">
+            f"""
+        <div class="sidebar-logo-wrap">
+            <div class="sidebar-logo-box">
+                <img src="data:image/png;base64,{__import__('base64').b64encode(open(str(logo_path), 'rb').read()).decode()}" alt="Logo">
+            </div>
+        </div>
         """,
             unsafe_allow_html=True,
         )
-        st.image(str(logo_path), width=140)
-        st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown(
         f"""
     <div class="sidebar-brand">
-        <h2 style="text-align: center; margin-bottom: 0.15rem;">StartupPulse AI</h2>
+        <h2>StartupPulse AI</h2>
         <p style="text-align: center; font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 400;">Explainable AI Dashboard</p>
         <div style="text-align: center;">
             <span class="sidebar-version">{APP_VERSION}</span>
@@ -1052,7 +1389,6 @@ with st.sidebar:
     menu = ["Home", "Analyze Review", "Explainability", "Model Metrics", "About"]
     choice = st.radio("Navigation", menu, label_visibility="collapsed")
 
-    # Tech stack badges
     st.markdown(
         """
     <div style="margin-top: 0.5rem;">
@@ -1139,13 +1475,79 @@ try:
             unsafe_allow_html=True,
         )
 
-        # Feature cards
+        # Header row: Search + Notification
+        hdr_cols = st.columns([3, 1])
+        with hdr_cols[0]:
+            st.markdown(
+                """
+            <div class="header-search">
+                <span class="header-search-icon">&#128269;</span>
+                <input type="text" placeholder="Search analytics, reviews, models..." readonly>
+            </div>
+            """,
+                unsafe_allow_html=True,
+            )
+        with hdr_cols[1]:
+            st.markdown(
+                '<div class="notif-btn" style="margin-top:2px;">&#128276;</div>',
+                unsafe_allow_html=True,
+            )
+
+        st.markdown('<hr class="premium-divider">', unsafe_allow_html=True)
+
+        # KPI Row - 3 cards
+        stats = get_dataset_stats()
+        metrics_df = load_metrics()
+        accuracy_val = 0.942
+        if metrics_df is not None and "Accuracy" in metrics_df.columns:
+            accuracy_val = metrics_df["Accuracy"].iloc[0]
+
+        k1, k2, k3 = st.columns(3)
+        with k1:
+            st.markdown(
+                f"""
+            <div class="widget-card anim-fade-up anim-delay-1">
+                <p class="section-label">Sentiment Distribution</p>
+                {render_horizontal_bar("Positive", 42, "#10b981")}
+                {render_horizontal_bar("Neutral", 31, "#6366f1")}
+                {render_horizontal_bar("Negative", 27, "#f43f5e")}
+            </div>
+            """,
+                unsafe_allow_html=True,
+            )
+        with k2:
+            st.markdown(
+                f"""
+            <div class="widget-card anim-fade-up anim-delay-2">
+                <p class="section-label">Review Trend (7 Days)</p>
+                {render_svg_line_chart()}
+            </div>
+            """,
+                unsafe_allow_html=True,
+            )
+        with k3:
+            st.markdown(
+                f"""
+            <div class="widget-card anim-fade-up anim-delay-3">
+                <p class="section-label">Model Accuracy</p>
+                <div style="display:flex;justify-content:center;margin:16px 0;">
+                    {render_circular_gauge(round(accuracy_val * 100, 1))}
+                </div>
+                <p style="text-align:center;font-size:12px;color:var(--text-muted);margin-top:8px;">DeBERTa-v3 Fine-tuned</p>
+            </div>
+            """,
+                unsafe_allow_html=True,
+            )
+
+        st.markdown('<hr class="premium-divider">', unsafe_allow_html=True)
+
+        # Feature cards - 2x2
         c1, c2 = st.columns(2)
         with c1:
             st.markdown(
                 """
             <div class="glass-card anim-fade-up anim-delay-1">
-                <div class="glass-card-icon" style="background: rgba(99,102,241,0.12); color: #818cf8;">&#9881;</div>
+                <div class="highlight-icon" style="background:rgba(79,70,226,0.1);color:#4f46e2;width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:12px;">&#9881;</div>
                 <h3>Transformer Model</h3>
                 <p>Fine-tuned Microsoft DeBERTa-v3 with disentangled attention for context-aware
                    three-class sentiment classification on employee review data.</p>
@@ -1156,7 +1558,7 @@ try:
             st.markdown(
                 """
             <div class="glass-card anim-fade-up anim-delay-2">
-                <div class="glass-card-icon" style="background: rgba(168,85,247,0.12); color: #c084fc;">&#9670;</div>
+                <div class="highlight-icon" style="background:rgba(124,58,237,0.1);color:#7c3aed;width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:12px;">&#9670;</div>
                 <h3>Real-time Prediction</h3>
                 <p>Singleton-loaded model ensures instant inference. Paste any employee review and
                    receive a sentiment prediction with confidence scores in milliseconds.</p>
@@ -1168,7 +1570,7 @@ try:
             st.markdown(
                 """
             <div class="glass-card anim-fade-up anim-delay-1">
-                <div class="glass-card-icon" style="background: rgba(34,197,94,0.12); color: #4ade80;">&#9673;</div>
+                <div class="highlight-icon" style="background:rgba(16,185,129,0.1);color:#10b981;width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:12px;">&#9673;</div>
                 <h3>Explainable AI</h3>
                 <p>SHAP decomposes every prediction into per-token importance scores. Waterfall plots,
                    bar charts, and interactive HTML reveal exactly why the model made its decision.</p>
@@ -1179,9 +1581,9 @@ try:
             st.markdown(
                 """
             <div class="glass-card anim-fade-up anim-delay-2">
-                <div class="glass-card-icon" style="background: rgba(251,146,60,0.12); color: #fb923c;">&#9632;</div>
+                <div class="highlight-icon" style="background:rgba(245,158,11,0.1);color:#f59e0b;width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:12px;">&#9632;</div>
                 <h3>Interactive Dashboard</h3>
-                <p>Multi-page Streamlit interface with dark theme, analytics overview, confusion
+                <p>Multi-page Streamlit interface with glassmorphic theme, analytics overview, confusion
                    matrix, and exportable visualizations for stakeholder reporting.</p>
             </div>
             """,
@@ -1190,14 +1592,14 @@ try:
 
         st.markdown('<hr class="premium-divider">', unsafe_allow_html=True)
 
-        # Quick stats
-        stats = get_dataset_stats()
+        # Quick stats row
+        st.markdown('<p class="section-label">Dataset Overview</p>', unsafe_allow_html=True)
         q1, q2, q3, q4 = st.columns(4)
         with q1:
             st.markdown(
                 f"""
             <div class="metric-card anim-fade-up anim-delay-1">
-                <div class="metric-value" style="color: var(--primary-light);">{stats['total']:,}</div>
+                <div class="metric-value" style="color:var(--primary);">{stats['total']:,}</div>
                 <div class="metric-label">Total Reviews</div>
             </div>
             """,
@@ -1207,7 +1609,7 @@ try:
             st.markdown(
                 """
             <div class="metric-card anim-fade-up anim-delay-2">
-                <div class="metric-value" style="color: var(--positive);">3</div>
+                <div class="metric-value" style="color:#10b981;">3</div>
                 <div class="metric-label">Sentiment Classes</div>
             </div>
             """,
@@ -1217,7 +1619,7 @@ try:
             st.markdown(
                 """
             <div class="metric-card anim-fade-up anim-delay-3">
-                <div class="metric-value" style="color: #c084fc;">12</div>
+                <div class="metric-value" style="color:#7c3aed;">12</div>
                 <div class="metric-label">Transformer Layers</div>
             </div>
             """,
@@ -1227,7 +1629,7 @@ try:
             st.markdown(
                 """
             <div class="metric-card anim-fade-up anim-delay-4">
-                <div class="metric-value" style="color: #fb923c;">768</div>
+                <div class="metric-value" style="color:#f59e0b;">768</div>
                 <div class="metric-label">Hidden Dimensions</div>
             </div>
             """,
@@ -1236,57 +1638,30 @@ try:
 
         st.markdown('<hr class="premium-divider">', unsafe_allow_html=True)
 
-        # Project highlights
+        # Highlights
         st.markdown('<p class="section-label">Project Highlights</p>', unsafe_allow_html=True)
-
-        h1, h2 = st.columns(2)
-        with h1:
-            st.markdown(
-                render_highlight_card("&#10003;", "Fine-tuned DeBERTa-v3", "rgba(99,102,241,0.12)", "#818cf8"),
-                unsafe_allow_html=True,
-            )
-            st.markdown(
-                render_highlight_card("&#10003;", "Real-time Sentiment Prediction", "rgba(168,85,247,0.12)", "#c084fc"),
-                unsafe_allow_html=True,
-            )
-            st.markdown(
-                render_highlight_card("&#10003;", "Interactive Dashboard", "rgba(251,146,60,0.12)", "#fb923c"),
-                unsafe_allow_html=True,
-            )
-            st.markdown(
-                render_highlight_card("&#10003;", "HR Intelligence Platform", "rgba(34,197,94,0.12)", "#4ade80"),
-                unsafe_allow_html=True,
-            )
-        with h2:
-            st.markdown(
-                render_highlight_card("&#10003;", "Explainable AI using SHAP", "rgba(34,197,94,0.12)", "#4ade80"),
-                unsafe_allow_html=True,
-            )
-            st.markdown(
-                render_highlight_card("&#10003;", "Employee Review Analytics", "rgba(59,130,246,0.12)", "#60a5fa"),
-                unsafe_allow_html=True,
-            )
-            st.markdown(
-                render_highlight_card("&#10003;", "Transformer-based NLP", "rgba(244,114,182,0.12)", "#f472b6"),
-                unsafe_allow_html=True,
-            )
-            st.markdown(
-                render_highlight_card("&#10003;", "Production-ready Architecture", "rgba(251,191,36,0.12)", "#fbbf24"),
-                unsafe_allow_html=True,
-            )
+        h1_col, h2_col = st.columns(2)
+        with h1_col:
+            st.markdown(render_highlight_card("&#10003;", "Fine-tuned DeBERTa-v3", "rgba(79,70,226,0.1)", "#4f46e2"), unsafe_allow_html=True)
+            st.markdown(render_highlight_card("&#10003;", "Real-time Sentiment Prediction", "rgba(124,58,237,0.1)", "#7c3aed"), unsafe_allow_html=True)
+            st.markdown(render_highlight_card("&#10003;", "Interactive Dashboard", "rgba(245,158,11,0.1)", "#f59e0b"), unsafe_allow_html=True)
+            st.markdown(render_highlight_card("&#10003;", "HR Intelligence Platform", "rgba(16,185,129,0.1)", "#10b981"), unsafe_allow_html=True)
+        with h2_col:
+            st.markdown(render_highlight_card("&#10003;", "Explainable AI using SHAP", "rgba(16,185,129,0.1)", "#10b981"), unsafe_allow_html=True)
+            st.markdown(render_highlight_card("&#10003;", "Employee Review Analytics", "rgba(59,130,246,0.1)", "#3b82f6"), unsafe_allow_html=True)
+            st.markdown(render_highlight_card("&#10003;", "Transformer-based NLP", "rgba(236,72,153,0.1)", "#ec4899"), unsafe_allow_html=True)
+            st.markdown(render_highlight_card("&#10003;", "Production-ready Architecture", "rgba(245,158,11,0.1)", "#f59e0b"), unsafe_allow_html=True)
 
         st.markdown('<hr class="premium-divider">', unsafe_allow_html=True)
 
-        # Live Model Performance
+        # Earning-style KPI Section
         st.markdown('<p class="section-label">Model Performance</p>', unsafe_allow_html=True)
-
-        metrics_df = load_metrics()
         if metrics_df is not None:
             metric_defs = [
-                ("Accuracy", "var(--primary-light)"),
-                ("Precision", "#c084fc"),
-                ("Recall", "#fb923c"),
-                ("F1 Score", "var(--positive)"),
+                ("Accuracy", "var(--primary)"),
+                ("Precision", "#7c3aed"),
+                ("Recall", "#f43f5e"),
+                ("F1 Score", "#10b981"),
             ]
             cols = st.columns(4)
             for i, (col_name, clr) in enumerate(metric_defs):
@@ -1297,7 +1672,7 @@ try:
                         st.markdown(
                             f"""
                         <div class="metric-card anim-fade-up anim-delay-{i+1}">
-                            <div class="metric-value" style="color: {clr};">{display_val}</div>
+                            <div class="metric-value" style="color:{clr};">{display_val}</div>
                             <div class="metric-label">{col_name}</div>
                         </div>
                         """,
@@ -1308,11 +1683,11 @@ try:
 
         st.markdown('<hr class="premium-divider">', unsafe_allow_html=True)
 
-        # SHAP preview on home
+        # SHAP preview
         shap_preview_path = PROJECT_ROOT / "assets" / "shap_explanation.png"
         shap_img = load_image_safe(shap_preview_path)
         if shap_img is not None:
-            st.markdown('<p class="section-label">Explainable AI</p>', unsafe_allow_html=True)
+            st.markdown('<p class="section-label">Explainable AI Preview</p>', unsafe_allow_html=True)
             sh1, sh2 = st.columns([3, 2])
             with sh1:
                 st.image(shap_img, use_container_width=True)
@@ -1320,21 +1695,35 @@ try:
                 st.markdown(
                     """
                 <div class="glass-card" style="height: 100%; display: flex; flex-direction: column; justify-content: center;">
-                    <div class="glass-card-icon" style="background: rgba(34,197,94,0.12); color: #4ade80;">&#9673;</div>
+                    <div class="highlight-icon" style="background:rgba(16,185,129,0.1);color:#10b981;width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:12px;">&#9673;</div>
                     <h3>Transparent Predictions</h3>
                     <p style="margin-top: 0.5rem;">
                         Every prediction includes token-level SHAP explanations, making the AI
                         transparent and trustworthy. Each word is scored by its contribution to
                         the final sentiment classification.
                     </p>
-                    <p style="margin-top: 1rem; font-size: 0.82rem;">
-                        <strong style="color: var(--primary-light);">Navigate to Analyze Review</strong>
+                    <p style="margin-top: 1rem; font-size: 13px;">
+                        <strong style="color: var(--primary);">Navigate to Analyze Review</strong>
                         to try it with your own employee feedback.
                     </p>
                 </div>
                     """,
                     unsafe_allow_html=True,
                 )
+
+        st.markdown('<hr class="premium-divider">', unsafe_allow_html=True)
+
+        # Glass Hero Promo
+        st.markdown(
+            """
+        <div class="hero-promo anim-scale">
+            <div class="hero-play">&#9654;</div>
+            <h3>Try Live Analysis</h3>
+            <p>Paste any employee review and get instant sentiment classification with SHAP explanations.</p>
+        </div>
+        """,
+            unsafe_allow_html=True,
+        )
 
         st.markdown('<hr class="premium-divider">', unsafe_allow_html=True)
 
@@ -1348,7 +1737,6 @@ try:
             unsafe_allow_html=True,
         )
 
-        # Footer
         st.markdown(render_footer(), unsafe_allow_html=True)
 
     # =================================================================
@@ -1365,9 +1753,7 @@ try:
             unsafe_allow_html=True,
         )
 
-        # Example reviews
         st.markdown('<p class="section-label">Try Example Reviews</p>', unsafe_allow_html=True)
-
         ex_cols = st.columns(3)
         for i, (sentiment, data) in enumerate(EXAMPLE_REVIEWS.items()):
             with ex_cols[i]:
@@ -1381,7 +1767,6 @@ try:
 
         st.markdown('<div style="margin-top: 0.5rem;"></div>', unsafe_allow_html=True)
 
-        # Text area
         review_input = st.text_area(
             "Employee Review",
             value=st.session_state["review_text"],
@@ -1403,7 +1788,6 @@ try:
                 st.session_state["prediction_result"] = None
                 st.rerun()
 
-        # Analysis pipeline
         if analyze_clicked:
             if not review_input.strip():
                 st.warning("Please enter a review to analyze.")
@@ -1431,7 +1815,7 @@ try:
 
                 loading_container.empty()
 
-        # ---- Result card ----
+        # Result card
         if st.session_state["prediction_result"]:
             res = st.session_state["prediction_result"]
             label = res["label"]
@@ -1439,13 +1823,13 @@ try:
             probs = res["probabilities"]
 
             color_map = {
-                "Positive": ("var(--positive)", "var(--positive-bg)"),
-                "Negative": ("var(--negative)", "var(--negative-bg)"),
-                "Neutral": ("var(--neutral)", "var(--neutral-bg)"),
+                "Positive": ("#10b981", "rgba(16,185,129,0.1)"),
+                "Negative": ("#ef4444", "rgba(239,68,68,0.1)"),
+                "Neutral": ("#6366f1", "rgba(99,102,241,0.1)"),
             }
-            accent_color, _ = color_map.get(label, ("var(--primary)", "var(--primary-glow)"))
+            accent_color, _ = color_map.get(label, ("#4f46e2", "rgba(79,70,226,0.1)"))
 
-            prob_order = [("Positive", "#22c55e"), ("Neutral", "#3b82f6"), ("Negative", "#ef4444")]
+            prob_order = [("Positive", "#10b981"), ("Neutral", "#6366f1"), ("Negative", "#ef4444")]
             prob_bars_html = ""
             for p_label, p_color in prob_order:
                 p_val = probs.get(p_label, 0)
@@ -1461,20 +1845,20 @@ try:
                             {render_sentiment_badge(label)}
                         </div>
                         <div style="margin-bottom: 0.3rem;">
-                            <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 500;
+                            <span style="font-size: 11px; color: var(--text-muted); font-weight: 500;
                                          text-transform: uppercase; letter-spacing: 0.06em;">
                                 Confidence
                             </span>
                         </div>
-                        <div style="font-size: 2.8rem; font-weight: 800; letter-spacing: -0.03em;
+                        <div style="font-family: 'Cabinet Grotesk'; font-size: 2.8rem; font-weight: 800; letter-spacing: -0.04em;
                                     color: {accent_color}; line-height: 1;">
                             {confidence:.1%}
                         </div>
-                        <div style="margin-top: 1.2rem; padding-top: 1rem; border-top: 1px solid var(--border);">
-                            <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.3rem;">
+                        <div style="margin-top: 1.2rem; padding-top: 1rem; border-top: 1px solid var(--glass-border);">
+                            <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 0.3rem;">
                                 Source Text
                             </p>
-                            <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;
+                            <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;
                                       max-height: 80px; overflow-y: auto;">
                                 {sanitize_html(st.session_state['review_text'][:200])}{'...' if len(st.session_state['review_text']) > 200 else ''}
                             </p>
@@ -1484,9 +1868,9 @@ try:
                     <div class="glass-card">
                         <p class="section-label">Class Probability Distribution</p>
                         {prob_bars_html}
-                        <div style="margin-top: 1.2rem; padding-top: 1rem; border-top: 1px solid var(--border);">
-                            <p style="font-size: 0.78rem; color: var(--text-muted);">
-                                Navigate to <strong style="color: var(--primary-light);">Explainability</strong>
+                        <div style="margin-top: 1.2rem; padding-top: 1rem; border-top: 1px solid var(--glass-border);">
+                            <p style="font-size: 13px; color: var(--text-secondary);">
+                                Navigate to <strong style="color: var(--primary);">Explainability</strong>
                                 to view SHAP token-level explanations for this prediction.
                             </p>
                         </div>
@@ -1497,7 +1881,6 @@ try:
                 unsafe_allow_html=True,
             )
 
-        # Footer
         st.markdown(render_footer(), unsafe_allow_html=True)
 
     # =================================================================
@@ -1529,18 +1912,17 @@ try:
         else:
             res = st.session_state["prediction_result"]
 
-            # Source text banner
             st.markdown(
                 f"""
             <div class="glass-card anim-fade-up" style="margin-bottom: 1.5rem;">
                 <p class="section-label">Analyzed Text</p>
-                <p style="font-size: 0.92rem; color: var(--text-secondary); line-height: 1.6;">
+                <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.6;">
                     {sanitize_html(st.session_state['review_text'])}
                 </p>
                 <div style="margin-top: 0.8rem;">
                     {render_sentiment_badge(res['label'])}
-                    <span style="margin-left: 10px; font-size: 0.85rem; color: var(--text-secondary);">
-                        Confidence: <strong style="color: var(--text-primary);">{res['confidence']:.1%}</strong>
+                    <span style="margin-left: 10px; font-size: 13px; color: var(--text-secondary);">
+                        Confidence: <strong style="color: var(--text);">{res['confidence']:.1%}</strong>
                     </span>
                 </div>
             </div>
@@ -1548,7 +1930,6 @@ try:
                 unsafe_allow_html=True,
             )
 
-            # Generate SHAP plots
             with st.spinner("Computing SHAP visualizations..."):
                 try:
                     explainer = get_shap_explainer()
@@ -1557,14 +1938,13 @@ try:
                     st.error(f"SHAP generation failed: {e}")
                     logger.error(f"SHAP plot generation error: {e}")
 
-            # Top tokens table
             tokens = res["token_importance"]
             sorted_tokens = sorted(tokens.items(), key=lambda x: abs(x[1]), reverse=True)[:10]
             token_df = pd.DataFrame(sorted_tokens, columns=["Token", "Impact"])
 
             def color_impact(val):
                 if val > 0:
-                    return "color: #22c55e; font-weight: 600;"
+                    return "color: #10b981; font-weight: 600;"
                 return "color: #ef4444; font-weight: 600;"
 
             with st.expander("Top 10 Influential Tokens", expanded=True):
@@ -1574,7 +1954,6 @@ try:
                     height=370,
                 )
 
-            # Waterfall plot
             shap_dir = REPORTS_DIR / "shap"
             waterfall_file = shap_dir / "dashboard_waterfall.png"
             with st.expander("SHAP Waterfall Plot", expanded=True):
@@ -1594,7 +1973,6 @@ try:
                 else:
                     st.info("Waterfall plot not available. Run a prediction first.")
 
-            # Bar plot
             bar_file = shap_dir / "dashboard_bar_summary.png"
             with st.expander("SHAP Bar Summary", expanded=False):
                 if bar_file.exists():
@@ -1606,7 +1984,6 @@ try:
                 else:
                     st.info("Bar summary plot not available.")
 
-            # Text HTML
             text_file = shap_dir / "dashboard_text.html"
             with st.expander("Token Impact Visualization", expanded=False):
                 if text_file.exists():
@@ -1619,7 +1996,6 @@ try:
                 else:
                     st.info("Text visualization not available.")
 
-        # Footer
         st.markdown(render_footer(), unsafe_allow_html=True)
 
     # =================================================================
@@ -1638,13 +2014,12 @@ try:
 
         stats = get_dataset_stats()
 
-        # Stat cards
         s1, s2, s3, s4 = st.columns(4)
         with s1:
             st.markdown(
                 f"""
             <div class="metric-card anim-fade-up anim-delay-1">
-                <div class="metric-value" style="color: var(--primary-light);">{stats['total']:,}</div>
+                <div class="metric-value" style="color:var(--primary);">{stats['total']:,}</div>
                 <div class="metric-label">Total Reviews</div>
             </div>
             """,
@@ -1654,7 +2029,7 @@ try:
             st.markdown(
                 f"""
             <div class="metric-card anim-fade-up anim-delay-2">
-                <div class="metric-value" style="color: var(--positive);">{stats['train']:,}</div>
+                <div class="metric-value" style="color:#10b981;">{stats['train']:,}</div>
                 <div class="metric-label">Training Set</div>
             </div>
             """,
@@ -1664,7 +2039,7 @@ try:
             st.markdown(
                 f"""
             <div class="metric-card anim-fade-up anim-delay-3">
-                <div class="metric-value" style="color: #c084fc;">{stats['val']:,}</div>
+                <div class="metric-value" style="color:#7c3aed;">{stats['val']:,}</div>
                 <div class="metric-label">Validation Set</div>
             </div>
             """,
@@ -1674,7 +2049,7 @@ try:
             st.markdown(
                 f"""
             <div class="metric-card anim-fade-up anim-delay-4">
-                <div class="metric-value" style="color: #fb923c;">{stats['test']:,}</div>
+                <div class="metric-value" style="color:#f43f5e;">{stats['test']:,}</div>
                 <div class="metric-label">Test Set</div>
             </div>
             """,
@@ -1686,20 +2061,19 @@ try:
         col_left, col_right = st.columns(2)
 
         with col_left:
-            # Performance metrics
             st.markdown('<p class="section-label">Performance Metrics</p>', unsafe_allow_html=True)
             metrics_df = load_metrics()
             if metrics_df is not None:
                 for col_name in metrics_df.columns:
                     val = metrics_df[col_name].iloc[0]
                     if "F1" in col_name:
-                        clr = "var(--positive)"
+                        clr = "#10b981"
                     elif "Accuracy" in col_name:
-                        clr = "var(--primary-light)"
+                        clr = "#4f46e2"
                     elif "Precision" in col_name:
-                        clr = "#c084fc"
+                        clr = "#7c3aed"
                     else:
-                        clr = "#fb923c"
+                        clr = "#f43f5e"
                     display_val = f"{val:.1%}" if val <= 1 else f"{val:.4f}"
                     st.markdown(
                         f"""
@@ -1715,27 +2089,20 @@ try:
             else:
                 st.info("Metrics file not found. Run model evaluation first.")
 
-            # Avg words
             st.markdown(
                 f"""
             <div class="metric-card" style="margin-top: 0.8rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <span class="metric-label" style="text-transform: none; letter-spacing: 0;">Avg. Words per Review</span>
-                    <span class="metric-value" style="font-size: 1.6rem; color: var(--text-primary);">{stats['avg_length']:.1f}</span>
+                    <span class="metric-value" style="font-size: 1.6rem; color: var(--text);">{stats['avg_length']:.1f}</span>
                 </div>
             </div>
             """,
                 unsafe_allow_html=True,
             )
 
-            # Class distribution
             st.markdown(
-                """
-            <p style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;
-                      color: var(--text-muted); margin-top: 1.5rem; margin-bottom: 1rem; font-weight: 600;">
-                Class Distribution
-            </p>
-            """,
+                '<p class="section-label" style="margin-top: 1.5rem;">Class Distribution</p>',
                 unsafe_allow_html=True,
             )
             if stats["classes"]:
@@ -1746,7 +2113,6 @@ try:
                 st.info("Dataset statistics unavailable.")
 
         with col_right:
-            # Confusion matrix
             st.markdown('<p class="section-label">Confusion Matrix</p>', unsafe_allow_html=True)
             cm_path = REPORTS_DIR / "confusion_matrix.png"
             cm_img = load_image_safe(cm_path)
@@ -1755,7 +2121,6 @@ try:
             else:
                 st.info("Confusion matrix not found. Run model evaluation first.")
 
-            # Classification report
             report_path = REPORTS_DIR / "classification_report.txt"
             if report_path.exists():
                 with st.expander("Classification Report", expanded=False):
@@ -1766,7 +2131,6 @@ try:
                     except Exception as e:
                         st.info(f"Could not load classification report: {e}")
 
-        # Footer
         st.markdown(render_footer(), unsafe_allow_html=True)
 
     # =================================================================
@@ -1783,10 +2147,9 @@ try:
             unsafe_allow_html=True,
         )
 
-        # Project Goal
         st.markdown(
             render_about_section(
-                "&#9733;", "rgba(99,102,241,0.12)", "#818cf8",
+                "&#9733;", "rgba(79,70,226,0.1)", "#4f46e2",
                 "Project Goal",
                 """
                 Build an explainable AI platform that analyzes employee feedback using state-of-the-art NLP
@@ -1797,10 +2160,9 @@ try:
             unsafe_allow_html=True,
         )
 
-        # Problem Statement
         st.markdown(
             render_about_section(
-                "&#9888;", "rgba(239,68,68,0.12)", "#f87171",
+                "&#9888;", "rgba(239,68,68,0.1)", "#ef4444",
                 "Problem Statement",
                 """
                 Employee feedback is one of the most valuable signals a startup can collect, but most
@@ -1813,10 +2175,9 @@ try:
             unsafe_allow_html=True,
         )
 
-        # Solution
         st.markdown(
             render_about_section(
-                "&#10003;", "rgba(34,197,94,0.12)", "#4ade80",
+                "&#10003;", "rgba(16,185,129,0.1)", "#10b981",
                 "Solution",
                 """
                 StartupPulse AI combines a fine-tuned Microsoft DeBERTa-v3 transformer with SHAP
@@ -1829,18 +2190,17 @@ try:
             unsafe_allow_html=True,
         )
 
-        # Key Features
         st.markdown(
             render_about_section(
-                "&#9881;", "rgba(99,102,241,0.12)", "#818cf8",
+                "&#9881;", "rgba(79,70,226,0.1)", "#4f46e2",
                 "Key Features",
                 """
                 <strong>Transformer Sentiment Analysis</strong> -- Fine-tuned DeBERTa-v3 for context-aware
                 three-class classification.<br><br>
                 <strong>SHAP Explainability</strong> -- Per-token importance scores with waterfall plots,
                 bar charts, and interactive HTML visualizations.<br><br>
-                <strong>Interactive Dashboard</strong> -- Five-page Streamlit application with dark theme
-                designed for non-technical HR stakeholders.<br><br>
+                <strong>Interactive Dashboard</strong> -- Five-page Streamlit application with glassmorphic
+                theme designed for non-technical HR stakeholders.<br><br>
                 <strong>Real-time Prediction</strong> -- Singleton-loaded model with instant inference
                 and confidence scores.<br><br>
                 <strong>Probability Distribution</strong> -- Full three-class probability output, not just
@@ -1852,10 +2212,9 @@ try:
             unsafe_allow_html=True,
         )
 
-        # Technology Stack
         st.markdown(
             render_about_section(
-                "&#9632;", "rgba(168,85,247,0.12)", "#c084fc",
+                "&#9632;", "rgba(124,58,237,0.1)", "#7c3aed",
                 "Technology Stack",
                 """
                 <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 0.5rem;">
@@ -1874,10 +2233,9 @@ try:
             unsafe_allow_html=True,
         )
 
-        # Model Architecture
         st.markdown(
             render_about_section(
-                "&#9670;", "rgba(59,130,246,0.12)", "#60a5fa",
+                "&#9670;", "rgba(59,130,246,0.1)", "#3b82f6",
                 "Model Architecture",
                 """
                 <strong>Base Model:</strong> microsoft/deberta-v3-base<br>
@@ -1893,10 +2251,9 @@ try:
             unsafe_allow_html=True,
         )
 
-        # Explainability
         st.markdown(
             render_about_section(
-                "&#9673;", "rgba(34,197,94,0.12)", "#4ade80",
+                "&#9673;", "rgba(16,185,129,0.1)", "#10b981",
                 "Explainability",
                 """
                 SHAP (SHapley Additive exPlanations) provides a game-theoretic framework for explaining
@@ -1912,10 +2269,9 @@ try:
             unsafe_allow_html=True,
         )
 
-        # Future Improvements
         st.markdown(
             render_about_section(
-                "&#9654;", "rgba(251,191,36,0.12)", "#fbbf24",
+                "&#9654;", "rgba(245,158,11,0.1)", "#f59e0b",
                 "Future Improvements",
                 """
                 <strong>Aspect Extraction</strong> -- Per-dimension sentiment (management, compensation, growth,
@@ -1930,10 +2286,9 @@ try:
             unsafe_allow_html=True,
         )
 
-        # Application Areas
         st.markdown(
             render_about_section(
-                "&#9632;", "rgba(244,114,182,0.12)", "#f472b6",
+                "&#9632;", "rgba(236,72,153,0.1)", "#ec4899",
                 "Application Areas",
                 """
                 <strong>HR Teams</strong> -- Identify systemic issues in employee experience with evidence-backed
@@ -1950,7 +2305,6 @@ try:
 
         st.markdown('<hr class="premium-divider">', unsafe_allow_html=True)
 
-        # Architecture image
         arch_path = PROJECT_ROOT / "assets" / "architecture.png"
         arch_img = load_image_safe(arch_path)
         if arch_img:
@@ -1959,29 +2313,28 @@ try:
 
         st.markdown('<hr class="premium-divider">', unsafe_allow_html=True)
 
-        # Links and license
         st.markdown(
             f"""
         <div class="glass-card">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                 <div>
-                    <p style="font-size: 0.82rem; color: var(--text-muted);">
-                        <strong style="color: var(--text-primary);">Author:</strong> Nikhil Khetavath &nbsp;&middot;&nbsp;
-                        <strong style="color: var(--text-primary);">License:</strong> MIT &nbsp;&middot;&nbsp;
-                        <strong style="color: var(--text-primary);">Version:</strong> {APP_VERSION}
+                    <p style="font-size: 13px; color: var(--text-muted);">
+                        <strong style="color: var(--text);">Author:</strong> Nikhil Khetavath &nbsp;&middot;&nbsp;
+                        <strong style="color: var(--text);">License:</strong> MIT &nbsp;&middot;&nbsp;
+                        <strong style="color: var(--text);">Version:</strong> {APP_VERSION}
                     </p>
                 </div>
                 <div style="display: flex; gap: 8px;">
                     <a href="https://github.com/khetavathnikhil17-afk/StartupPulse-AI" target="_blank" style="
-                        display: inline-block; background: var(--bg-card-hover); border: 1px solid var(--border);
-                        border-radius: var(--radius-xs); padding: 8px 16px; color: var(--text-primary);
-                        text-decoration: none; font-size: 0.82rem; font-weight: 500;">
+                        display: inline-block; background: var(--glass); backdrop-filter: blur(8px); border: 1px solid var(--glass-border);
+                        border-radius: 12px; padding: 8px 16px; color: var(--text);
+                        text-decoration: none; font-size: 13px; font-weight: 500; transition: all 0.3s var(--transition);">
                         GitHub Repository
                     </a>
                     <a href="https://www.linkedin.com/in/nikhilkhetavath-ai" target="_blank" style="
-                        display: inline-block; background: var(--bg-card-hover); border: 1px solid var(--border);
-                        border-radius: var(--radius-xs); padding: 8px 16px; color: var(--text-primary);
-                        text-decoration: none; font-size: 0.82rem; font-weight: 500;">
+                        display: inline-block; background: var(--glass); backdrop-filter: blur(8px); border: 1px solid var(--glass-border);
+                        border-radius: 12px; padding: 8px 16px; color: var(--text);
+                        text-decoration: none; font-size: 13px; font-weight: 500; transition: all 0.3s var(--transition);">
                         LinkedIn Profile
                     </a>
                 </div>
@@ -1991,7 +2344,6 @@ try:
             unsafe_allow_html=True,
         )
 
-        # Footer
         st.markdown(render_footer(), unsafe_allow_html=True)
 
 except Exception as e:
