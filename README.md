@@ -507,8 +507,8 @@ Please ensure your code follows the existing style and includes appropriate test
 
 **Nikhil Khetavath**
 
-- [GitHub](https://github.com/NikhilKhetavath)
-- [LinkedIn](#)
+- [GitHub](https://github.com/khetavathnikhil17-afk)
+- [LinkedIn](https://www.linkedin.com/in/nikhilkhetavath-ai?utm_source=share_via&utm_content=profile&utm_medium=member_android)
 
 ---
 
